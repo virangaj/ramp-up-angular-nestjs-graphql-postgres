@@ -62,6 +62,8 @@ export class StudentService {
       const student: Student =
         this.studentRepository.create(updateStudentInput);
       student.id = id;
+      let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
+      student.age = age;
       const updatedStudent = this.studentRepository.save(student);
       this.logger.log('Student updated successfully.');
       return updatedStudent;
@@ -69,8 +71,26 @@ export class StudentService {
       this.logger.error('Failed to update student : ' + error.message);
     }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} student`;
+  //  delete student by id
+  remove(id: number): Promise<Student | null> {
+    return this.studentRepository
+      .findOne({ where: { id: id } })
+      .then(async (student) => {
+        if (!student) {
+          this.logger.error('Failed to delete student : student not found.');
+          throw new Error('Student not found');
+        }
+        const deletedStd = await this.studentRepository.delete(id);
+        if (deletedStd.affected === 1) {
+          this.logger.log('Student deleted successfully.');
+          return student;
+        } else {
+          throw new Error('Failed to delete student');
+        }
+      })
+      .catch((error) => {
+        this.logger.error('Failed to delete student : ' + error.message);
+        return null;
+      });
   }
 }

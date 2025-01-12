@@ -35,12 +35,12 @@ export class StudentResolver {
   @Mutation(() => Student, { name: 'updateStudent' })
   updateStudent(
     @Args('updateStudentInput') updateStudentInput: CreateStudentInput,
-    id: number,
+    @Args('id') id: number,
   ) {
     return this.studentService.update(id, updateStudentInput);
   }
 
-  @Mutation(() => Student)
+  @Mutation(() => Student, { name: 'removeStudent' })
   removeStudent(@Args('id', { type: () => Int }) id: number) {
     return this.studentService.remove(id);
   }

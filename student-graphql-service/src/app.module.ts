@@ -17,15 +17,15 @@ import { DateTimeScalar } from './graphql/scalars/date-time.scalar';
       useFactory: async () => {
         // Ensure the database exists before proceeding
         const client = new Client({
-          host: 'localhost',
-          port: 5432,
-          user: 'postgres',
-          password: '123456',
+          host: process.env.DATABASE_HOST,
+          port: parseInt(process.env.DATABASE_PORT, 10),
+          user: process.env.DATABASE_USERNAME,
+          password: process.env.DATABASE_PASSWORD,
         });
 
         await client.connect();
 
-        const dbName = 'rampup_students';
+        const dbName = process.env.DATABASE_NAME;
         const result = await client.query(
           `SELECT 1 FROM pg_database WHERE datname = $1`,
           [dbName],
@@ -42,10 +42,10 @@ import { DateTimeScalar } from './graphql/scalars/date-time.scalar';
 
         return {
           type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'postgres',
-          password: '123456',
+          host: process.env.DATABASE_HOST,
+          port: parseInt(process.env.DATABASE_PORT, 10),
+          username: process.env.DATABASE_USERNAME,
+          password: process.env.DATABASE_PASSWORD,
           database: dbName,
           entities: ['dist/**/*.entity{.ts,.js}'],
           synchronize: true, // Sync schema automatically (for development)

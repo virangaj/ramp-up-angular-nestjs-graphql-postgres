@@ -1,0 +1,41 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Student {
+  id: Float!
+  name: String!
+  age: Float!
+  email: String!
+  gender: String!
+  address: String!
+  mobileNo: String!
+  dob: DateTime!
+}
+
+scalar DateTime
+
+type Query {
+  getAllStudent: [Student!]!
+  getStudnetById(id: Int!): Student!
+}
+
+type Mutation {
+  createStudent(createStudentInput: CreateStudentInput!): Student!
+  bulkCreateStudents(bulkCreateStudents: CreateBulkStudentInput!): [Student!]!
+  updateStudent(updateStudentInput: CreateStudentInput!): Student!
+  removeStudent(id: Int!): Student!
+}
+
+input CreateStudentInput {
+  name: String!
+  email: String!
+  gender: String!
+  address: String!
+  mobileNo: String!
+  dob: DateTime!
+}
+
+input CreateBulkStudentInput {
+  bulkCreateStudents: [CreateStudentInput!]!
+}

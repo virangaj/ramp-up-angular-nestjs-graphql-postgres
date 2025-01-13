@@ -1,0 +1,1 @@
+export const FILEUPLOAD_QUEUE : string = 'fileuploadqueue';

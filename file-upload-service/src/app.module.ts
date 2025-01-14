@@ -4,6 +4,6 @@ import { FileuploadModule } from './fileupload/fileupload.module';
 @Module({
   imports: [FileuploadModule],
   controllers: [],
-  providers: [],
+  exports: [],
 })
 export class AppModule {}

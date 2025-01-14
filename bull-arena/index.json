@@ -1,0 +1,16 @@
+{
+  "queues": [
+    {
+      "name": "FILEUPLOAD_QUEUE",
+      "hostId": "Bull Queues",
+      "type": "bull",
+      "redis": {
+        "host": "127.0.0.1",
+        "port": 6379
+      }
+    }
+  ],
+  "ui": {
+    "port": 4567
+  }
+}

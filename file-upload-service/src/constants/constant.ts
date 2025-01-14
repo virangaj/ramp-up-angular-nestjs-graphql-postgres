@@ -1,1 +1,1 @@
-export const FILEUPLOAD_QUEUE : string = 'fileuploadqueue';
+export const FILEUPLOAD_QUEUE : string = 'FILEUPLOAD_QUEUE';

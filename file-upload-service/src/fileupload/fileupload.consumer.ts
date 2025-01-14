@@ -9,7 +9,6 @@ import {
   CreateBulkStudentInput,
   StudentInput,
 } from 'src/types/create-bulk-student.input';
-import { json } from 'stream/consumers';
 @Processor(FILEUPLOAD_QUEUE)
 export class FileUploadConsumer {
   private readonly client: ApolloClient<any>;
@@ -79,8 +78,6 @@ export class FileUploadConsumer {
           dob: dob,
         };
       });
-      this.logger.log('students : ' + JSON.stringify(students));
-
       // update variables
       const variables = { bulkCreateStudents: { bulkCreateStudents: students } };
 

@@ -66,7 +66,8 @@
         <p>Loading, please wait...</p>
       </div>
     </div>
-    <kendo-grid *ngIf="!loading"
+    <kendo-grid
+      *ngIf="!loading"
       [kendoGridBinding]="gridData"
       [filterable]="true"
       [height]="1000"
@@ -108,14 +109,16 @@
       </kendo-grid-column>
       <kendo-grid-command-column title="command" [width]="220">
         <ng-template kendoGridCellTemplate let-isNew="isNew">
-          <button kendoGridEditCommand [primary]="true">Edit</button>
-          <button kendoGridRemoveCommand>Remove</button>
-          <button kendoGridSaveCommand [disabled]="formGroup?.invalid">
-            {{ isNew ? "Add" : "Update" }}
-          </button>
-          <button kendoGridCancelCommand>
-            {{ isNew ? "Discard changes" : "Cancel" }}
-          </button>
+          <div class="command-buttons">
+            <button kendoGridEditCommand [primary]="true">Edit</button>
+            <button kendoGridRemoveCommand>Remove</button>
+            <button kendoGridSaveCommand [disabled]="formGroup?.invalid">
+              {{ isNew ? "Add" : "Update" }}
+            </button>
+            <button kendoGridCancelCommand>
+              {{ isNew ? "Discard changes" : "Cancel" }}
+            </button>
+          </div>
         </ng-template>
       </kendo-grid-command-column>
     </kendo-grid>

@@ -60,6 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
         console.log(loading);
         this.loading = loading;
         this.gridData = data.getAllStudent;
+        this.cdr.detectChanges();
       });
   }
   ngOnDestroy() {

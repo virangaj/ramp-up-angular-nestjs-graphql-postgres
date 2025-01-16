@@ -61,10 +61,15 @@
 <main class="main">
   <div class="content">
     <h1>{{ title }}</h1>
-    <kendo-grid
+    <div *ngIf="loading">
+      <div class="loading-message">
+        <p>Loading, please wait...</p>
+      </div>
+    </div>
+    <kendo-grid *ngIf="!loading"
       [kendoGridBinding]="gridData"
       [filterable]="true"
-      [height]="350"
+      [height]="500"
       [pageable]="true"
       [sortable]="true"
       [skip]="gridState.skip"

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -20,7 +20,9 @@ import {
 // import { State } from './models';
 import { process, State } from '@progress/kendo-data-query';
 import { CreateStudent } from './models';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
+import { Apollo } from 'apollo-angular';
+import { GET_ALL_STUDENT } from './graphql.operations';
 
 @Component({
   selector: 'app-root',
@@ -28,30 +30,29 @@ import { map, Observable } from 'rxjs';
   standalone: false,
   styleUrl: './app.component.css',
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  loading: boolean = true;
+  public gridData: any[] = [];
+
+  private querySubscription: Subscription;
+  constructor(private readonly apollo: Apollo) {}
+
+  ngOnInit() {
+    this.querySubscription = this.apollo
+      .watchQuery<any>({
+        query: GET_ALL_STUDENT,
+      })
+      .valueChanges.subscribe(({ data, loading }) => {
+        console.log(loading);
+        this.loading = loading;
+        this.gridData = data.getAllStudent;
+      });
+  }
+  ngOnDestroy() {
+    this.querySubscription.unsubscribe();
+  }
   title = 'Student Management';
-  public gridData: any[] = [
-    {
-      id: 4,
-      name: 'John Doe',
-      age: 28,
-      email: 'john.doe@example.com',
-      gender: 'Male',
-      address: '123 Main Street, New York',
-      mobileNo: '0123456789',
-      dob: '1997-02-07',
-    },
-    {
-      id: 5,
-      name: 'Sara Smith',
-      age: 30,
-      email: 'sara@example.com',
-      gender: 'Female',
-      address: 'No.45, street, Colombo',
-      mobileNo: '0771234567',
-      dob: '1995-06-15',
-    },
-  ];
+
   public type: PagerType = 'numeric';
   public buttonCount = 5;
   public info = true;

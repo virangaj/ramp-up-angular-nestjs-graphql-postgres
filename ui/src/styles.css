@@ -1,1 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
+.loading-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 500px; /* Match the grid height */
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
+  }
+  

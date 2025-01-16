@@ -23,3 +23,6 @@ export interface State {
   skip: number;
   take: number;
 }
+export interface CreateStudentResponse {
+  createStudent: Student;
+}

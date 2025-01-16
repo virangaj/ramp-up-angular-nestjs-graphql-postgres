@@ -69,7 +69,7 @@
     <kendo-grid *ngIf="!loading"
       [kendoGridBinding]="gridData"
       [filterable]="true"
-      [height]="500"
+      [height]="1000"
       [pageable]="true"
       [sortable]="true"
       [skip]="gridState.skip"
@@ -93,6 +93,7 @@
       >
       </kendo-grid-column>
       <kendo-grid-column field="name" title="Name"> </kendo-grid-column>
+      <kendo-grid-column field="email" title="Email"> </kendo-grid-column>
       <kendo-grid-column field="gender" title="Gender"> </kendo-grid-column>
       <kendo-grid-column field="address" title="Address"> </kendo-grid-column>
       <kendo-grid-column field="mobileNo" title="MobileNo"> </kendo-grid-column>

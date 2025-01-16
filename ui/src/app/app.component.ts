@@ -1,4 +1,10 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -19,10 +25,10 @@ import {
 } from '@progress/kendo-angular-grid';
 // import { State } from './models';
 import { process, State } from '@progress/kendo-data-query';
-import { CreateStudent } from './models';
+import { CreateStudent, CreateStudentResponse, Student } from './models';
 import { map, Observable, Subscription } from 'rxjs';
 import { Apollo } from 'apollo-angular';
-import { GET_ALL_STUDENT } from './graphql.operations';
+import { CREATE_STUDENT, GET_ALL_STUDENTS } from './graphql.operations';
 
 @Component({
   selector: 'app-root',
@@ -35,12 +41,15 @@ export class AppComponent implements OnInit, OnDestroy {
   public gridData: any[] = [];
 
   private querySubscription: Subscription;
-  constructor(private readonly apollo: Apollo) {}
+  constructor(
+    private readonly apollo: Apollo,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.querySubscription = this.apollo
       .watchQuery<any>({
-        query: GET_ALL_STUDENT,
+        query: GET_ALL_STUDENTS,
       })
       .valueChanges.subscribe(({ data, loading }) => {
         console.log(loading);
@@ -117,7 +126,34 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // this.editService.save(product, isNew);
     sender.closeRow(rowIndex);
-    console.log('saveHandler : ', student);
+    console.log('isNew : ', isNew);
+
+    if (isNew) {
+      //  create new record
+      console.log('saveHandler : ', student);
+      this.apollo
+        .mutate<CreateStudentResponse>({
+          mutation: CREATE_STUDENT,
+          variables: {
+            input: student,
+          },
+        })
+        .subscribe(
+          ({ data }) => {
+            console.log('got data', data);
+            const newStd = data?.createStudent;
+            if (this.gridData.length > 0) {
+              this.gridData = [...this.gridData, newStd];
+            } else {
+              this.gridData = [newStd];
+            }
+            this.cdr.detectChanges();
+          },
+          (error) => {
+            console.log('there was an error sending the query', error);
+          }
+        );
+    }
   }
   public removeHandler(args: RemoveEvent): void {
     // remove the current dataItem from the current data source,

@@ -17,6 +17,7 @@ export class StudentService {
   // create new student record
   create(createStudentInput: CreateStudentInput): Promise<Student> {
     try {
+      this.logger.log('Creating new student started.');
       const student: Student =
         this.studentRepository.create(createStudentInput);
       //  calculate age -> assume dob is not this year
@@ -32,6 +33,7 @@ export class StudentService {
   //  create multiple student records
   bulkCreate(createStudentInput: CreateBulkStudentInput) {
     try {
+      this.logger.log('BulkCreate new students started.');
       const students: Student[] = createStudentInput.bulkCreateStudents.map(
         (student: CreateStudentInput) => {
           const singleStd = this.studentRepository.create(student);
@@ -50,10 +52,12 @@ export class StudentService {
   }
   //  get all students
   findAll(): Promise<Student[]> {
+    this.logger.log('Fetching All Students.');
     return this.studentRepository.find();
   }
   //  get student by id
   findOne(id: number): Promise<Student> {
+    this.logger.log('Find student for ID: ' + id + '.');
     return this.studentRepository.findOne({ where: { id } });
   }
 

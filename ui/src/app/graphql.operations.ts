@@ -31,7 +31,7 @@ export const CREATE_STUDENT = gql`
 `;
 
 export const UPDATE_STUDENT = gql`
-  mutation UpdateStudent($id: ID!, $input: UpdateStudentInput!) {
+  mutation UpdateStudent($id: Float!, $input: CreateStudentInput!) {
     updateStudent(id: $id, updateStudentInput: $input) {
       id
       name
@@ -41,6 +41,14 @@ export const UPDATE_STUDENT = gql`
       address
       mobileNo
       dob
+    }
+  }
+`;
+
+export const DELETE_STUDENT = gql`
+  mutation RemoveStudent($id: Int!) {
+    removeStudent(id: $id) {
+      id
     }
   }
 `;

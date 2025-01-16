@@ -28,7 +28,12 @@ import { process, State } from '@progress/kendo-data-query';
 import { CreateStudent, CreateStudentResponse, Student } from './models';
 import { map, Observable, Subscription } from 'rxjs';
 import { Apollo } from 'apollo-angular';
-import { CREATE_STUDENT, GET_ALL_STUDENTS } from './graphql.operations';
+import {
+  CREATE_STUDENT,
+  DELETE_STUDENT,
+  GET_ALL_STUDENTS,
+  UPDATE_STUDENT,
+} from './graphql.operations';
 
 @Component({
   selector: 'app-root',
@@ -69,6 +74,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public previousNext = true;
   public position: PagerPosition = 'bottom';
   private editedRowIndex: number | undefined = undefined;
+  public editDataID: number | undefined = undefined;
   public pageSize = 5;
   public skip = 0;
   public formGroup!: FormGroup | any;
@@ -103,9 +109,8 @@ export class AppComponent implements OnInit, OnDestroy {
       dob: new FormControl(dataItem.dob),
     });
     this.editedRowIndex = args.rowIndex;
+    this.editDataID = dataItem.id;
     args.sender.editRow(args.rowIndex, this.formGroup);
-    console.log('editHandler : ', args);
-    console.log('this.editedRowIndex : ', this.editedRowIndex);
   }
   public addHandler(args: AddEvent): void {
     this.closeEditor(args.sender);
@@ -119,18 +124,12 @@ export class AppComponent implements OnInit, OnDestroy {
       dob: new FormControl(),
     });
     args.sender.addRow(this.formGroup);
-    console.log('addHandler : ', args);
   }
   public saveHandler({ sender, rowIndex, formGroup, isNew }: SaveEvent): void {
     const student: CreateStudent[] = formGroup.value;
-
-    // this.editService.save(product, isNew);
     sender.closeRow(rowIndex);
-    console.log('isNew : ', isNew);
-
     if (isNew) {
       //  create new record
-      console.log('saveHandler : ', student);
       this.apollo
         .mutate<CreateStudentResponse>({
           mutation: CREATE_STUDENT,
@@ -140,7 +139,6 @@ export class AppComponent implements OnInit, OnDestroy {
         })
         .subscribe(
           ({ data }) => {
-            console.log('got data', data);
             const newStd = data?.createStudent;
             if (this.gridData.length > 0) {
               this.gridData = [...this.gridData, newStd];
@@ -153,13 +151,54 @@ export class AppComponent implements OnInit, OnDestroy {
             console.log('there was an error sending the query', error);
           }
         );
+    } else {
+      //  update existing record
+      this.apollo
+        .mutate<CreateStudentResponse>({
+          mutation: UPDATE_STUDENT,
+          variables: {
+            id: this.editDataID,
+            input: student,
+          },
+        })
+        .subscribe(
+          ({ data }) => {
+            const updatedStd = data?.createStudent;
+            this.gridData = this.gridData.map((item) => {
+              if (item.id === updatedStd?.id) {
+                return updatedStd;
+              }
+              return item;
+            });
+            this.editDataID = undefined;
+            this.cdr.detectChanges();
+          },
+          (error) => {
+            console.log('there was an error sending the query', error);
+          }
+        );
     }
   }
   public removeHandler(args: RemoveEvent): void {
-    // remove the current dataItem from the current data source,
-    // `editService` in this example
-    // this.editService.remove(args.dataItem);
     console.log('removeHandler : ', args);
+    this.apollo
+      .mutate({
+        mutation: DELETE_STUDENT,
+        variables: {
+          id: args.dataItem.id,
+        },
+      })
+      .subscribe(
+        ({ data }) => {
+          this.gridData = this.gridData.filter(
+            (item) => item.id !== args.dataItem.id
+          );
+          this.cdr.detectChanges();
+        },
+        (error) => {
+          console.log('there was an error sending the query', error);
+        }
+      );
   }
   public cancelHandler(args: CancelEvent): void {
     // close the editor for the given row

@@ -13,11 +13,28 @@ type Student {
   dob: DateTime!
 }
 
+type FetchPaginatedStudentsOutput {
+  current: Float!
+  pageSize: Float!
+  totalPages: Float!
+  totalSize: Float!
+  data: [Student!]!
+}
+
 scalar DateTime
 
 type Query {
   getAllStudent: [Student!]!
   getStudnetById(id: Int!): Student!
+  fetchPaginatedStudents(page: FetchPaginatedStudentsInput!): FetchPaginatedStudentsOutput!
+}
+
+input FetchPaginatedStudentsInput {
+  current: Float!
+  pageSize: Float!
+  name: String
+  email: String
+  address: String
 }
 
 type Mutation {

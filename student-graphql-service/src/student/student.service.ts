@@ -106,12 +106,12 @@ export class StudentService {
     try {
       this.logger.log('Fetching paginated students : ' + JSON.stringify(page));
       const [data, count] = await this.studentRepository.findAndCount({
-        skip: page.current > 0 ? (page.current - 1) * page.pageSize : 0,
+        skip: page.skip > 0 ? page.skip : 0,
         take: page.pageSize,
       });
       return {
         totalPages: Math.ceil(count / page.pageSize),
-        current: page.current,
+        current: page.skip,
         pageSize: page.pageSize,
         totalSize: count,
         data: data,

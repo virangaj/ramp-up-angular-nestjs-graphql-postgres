@@ -3,7 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class FetchPaginatedStudentsInput {
   @Field()
-  current: number;
+  skip: number;
   @Field()
   pageSize: number;
   @Field({ nullable: true })

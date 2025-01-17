@@ -52,3 +52,23 @@ export const DELETE_STUDENT = gql`
     }
   }
 `;
+
+export const FETCH_PAGINATED_STUDENTS = gql`
+  query FetchPaginatedStudents($page: FetchPaginatedStudentsInput!) {
+    fetchPaginatedStudents(page: $page) {
+      current
+      pageSize
+      totalPages
+      data {
+        id
+        name
+        age
+        email
+        gender
+        address
+        mobileNo
+        dob
+      }
+    }
+  }
+`;

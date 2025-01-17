@@ -26,3 +26,11 @@ export interface State {
 export interface CreateStudentResponse {
   createStudent: Student;
 }
+
+export interface FetchPaginatedStudentsInput {
+  skip: number;
+  pageSize: number;
+  name?: string;
+  email?: string;
+  address?: string;
+}

@@ -30,7 +30,7 @@ type Query {
 }
 
 input FetchPaginatedStudentsInput {
-  current: Float!
+  skip: Float!
   pageSize: Float!
   name: String
   email: String

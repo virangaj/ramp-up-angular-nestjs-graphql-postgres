@@ -50,24 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef
   ) {}
-
-  ngOnInit() {
-    this.querySubscription = this.apollo
-      .watchQuery<any>({
-        query: GET_ALL_STUDENTS,
-      })
-      .valueChanges.subscribe(({ data, loading }) => {
-        console.log(loading);
-        this.loading = loading;
-        this.gridData = data.getAllStudent;
-        this.cdr.detectChanges();
-      });
-  }
-  ngOnDestroy() {
-    this.querySubscription.unsubscribe();
-  }
   title = 'Student Management';
-
   public type: PagerType = 'numeric';
   public buttonCount = 5;
   public info = true;
@@ -84,6 +67,20 @@ export class AppComponent implements OnInit, OnDestroy {
     skip: 0,
     take: 5,
   };
+  ngOnInit() {
+    this.querySubscription = this.apollo
+      .watchQuery<any>({
+        query: GET_ALL_STUDENTS,
+      })
+      .valueChanges.subscribe(({ data, loading }) => {
+        this.loading = loading;
+        this.gridData = data.getAllStudent;
+        this.cdr.detectChanges();
+      });
+  }
+  ngOnDestroy() {
+    this.querySubscription.unsubscribe();
+  }
   public view: Observable<GridDataResult> | undefined;
 
   public onStateChange(state: State): void {

@@ -9,7 +9,7 @@ import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
+import { provideAnimations } from '@angular/platform-browser/animations';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -27,7 +27,8 @@ import { AppComponent } from './app.component';
         link: httpLink.create({ uri: 'http://localhost:3001/graphql' }),
         cache: new InMemoryCache(),
       };
-    })
+    }),
+    provideAnimations(),
   ],
   bootstrap: [AppComponent],
 })

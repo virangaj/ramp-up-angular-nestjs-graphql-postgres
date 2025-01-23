@@ -21,8 +21,16 @@ import {
   GET_ALL_STUDENTS,
   UPDATE_STUDENT,
 } from './graphql.operations';
-import { CreateStudent, CreateStudentResponse, UpdateStudentResponse } from './models';
-
+import {
+  CreateStudent,
+  CreateStudentResponse,
+  UpdateStudentResponse,
+} from './models';
+import {
+  NotificationRef,
+  NotificationService,
+  NotificationSettings,
+} from '@progress/kendo-angular-notification';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -32,12 +40,14 @@ import { CreateStudent, CreateStudentResponse, UpdateStudentResponse } from './m
 export class AppComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   public gridData: any[] = [];
-
+  public notificationReference: NotificationRef;
   private querySubscription: Subscription;
   constructor(
     private readonly apollo: Apollo,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService
   ) {}
+
   title = 'Student Management';
   public type: PagerType = 'numeric';
   public buttonCount = 5;
@@ -54,6 +64,12 @@ export class AppComponent implements OnInit, OnDestroy {
     sort: [],
     skip: 0,
     take: 5,
+  };
+  public notificationState: NotificationSettings = {
+    content: 'Your data has been saved.',
+    type: { style: 'success', icon: true },
+    animation: { type: 'slide', duration: 400 },
+    hideAfter: 3000,
   };
   ngOnInit() {
     this.querySubscription = this.apollo
@@ -134,9 +150,11 @@ export class AppComponent implements OnInit, OnDestroy {
             } else {
               this.gridData = [newStd];
             }
+            this.showNotification("success")
             this.cdr.detectChanges();
           },
           (error) => {
+            this.showNotification("error")
             console.log('there was an error sending the query', error);
           }
         );
@@ -153,7 +171,6 @@ export class AppComponent implements OnInit, OnDestroy {
         .subscribe(
           ({ data }) => {
             const updatedStd = data?.updateStudent;
-            console.log(`Student updated successfully. : ${JSON.stringify(data)}`);
             this.gridData = this.gridData.map((item) => {
               if (item.id === updatedStd?.id) {
                 return updatedStd;
@@ -162,9 +179,12 @@ export class AppComponent implements OnInit, OnDestroy {
             });
             this.editDataID = undefined;
             this.cdr.detectChanges();
+            this.showNotification("success")
           },
           (error) => {
             console.log('there was an error sending the query', error);
+            this.showNotification("error")
+
           }
         );
     }
@@ -184,9 +204,11 @@ export class AppComponent implements OnInit, OnDestroy {
             (item) => item.id !== args.dataItem.id
           );
           this.cdr.detectChanges();
+          this.showNotification("success", "Data has been deleted successfully.")
         },
         (error) => {
           console.log('there was an error sending the query', error);
+          this.showNotification("error")
         }
       );
   }
@@ -198,5 +220,19 @@ export class AppComponent implements OnInit, OnDestroy {
     grid.closeRow(rowIndex);
     this.editedRowIndex = undefined;
     this.formGroup = null;
+  }
+
+  public showNotification(type: 'success' | 'error', message?: string): void {
+    switch (type) {
+      case 'success':
+        this.notificationState.content = message ? message : 'Data has been saved successfully.';
+        this.notificationState.type = { style: 'success', icon: true };
+        break;
+      case 'error':
+        this.notificationState.content = 'Oops, something went wrong...';
+        this.notificationState.type = { style: 'error', icon: true };
+        break;
+    }
+    this.notificationService.show(this.notificationState);
   }
 }

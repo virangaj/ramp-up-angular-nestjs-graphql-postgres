@@ -8,14 +8,11 @@ export class FileuploadService {
   private readonly logger = new Logger(FileuploadService.name, {
     timestamp: true,
   });
- 
+
   constructor(
     @InjectQueue(FILEUPLOAD_QUEUE) private readonly fileUploadQueue: Queue,
-  ) {
-    
-  }
+  ) {}
 
-  
   async processBulkUplod(filename: string) {
     // create the filepath
     const filePath = path.join(

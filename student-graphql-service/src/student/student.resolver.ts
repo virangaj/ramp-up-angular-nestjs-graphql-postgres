@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ResolveReference } from '@nestjs/graphql';
 import { StudentService } from './student.service';
 import { Student } from './entities/student.entity';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -29,7 +29,7 @@ export class StudentResolver {
     return this.studentService.findAll();
   }
 
-  @Query(() => Student, { name: 'getStudnetById' })
+  @Query(() => Student, { name: 'getStudentById' })
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.studentService.findOne(id);
   }
@@ -52,5 +52,10 @@ export class StudentResolver {
     @Args('page') page: FetchPaginatedStudentsInput,
   ): Promise<FetchPaginatedStudentsOutput> {
     return this.studentService.fetchPaginatedStudents(page);
+  }
+
+  @ResolveReference()
+  resolveReference(reference: { __typename: string; id: number }): Promise<Student> {
+    return this.studentService.findOne(reference.id);
   }
 }

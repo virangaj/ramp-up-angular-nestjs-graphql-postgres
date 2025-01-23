@@ -1,10 +1,11 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
+@Directive('@key(fields: "id")')
 @Entity()
 export class Student {
-  @Field()
+  @Field(()=> ID)
   @PrimaryGeneratedColumn('increment')
   id: number;
 

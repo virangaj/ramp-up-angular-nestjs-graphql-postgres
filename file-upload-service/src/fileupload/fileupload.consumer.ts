@@ -23,7 +23,7 @@ export class FileUploadConsumer {
       this.logger.error(`Job ${job.id} failed: ${err.message}`);
     });
     this.client = new ApolloClient({
-      uri: 'http://localhost:3001/graphql',
+      uri: 'http://localhost:3000/graphql',
       cache: new InMemoryCache(),
     });
   }

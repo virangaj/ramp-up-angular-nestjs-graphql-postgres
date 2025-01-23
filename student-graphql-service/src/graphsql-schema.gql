@@ -2,8 +2,28 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+directive @key(fields: String!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+
+directive @extends on OBJECT | INTERFACE
+
+directive @external on OBJECT | FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @shareable on FIELD_DEFINITION | OBJECT
+
+directive @link(url: String!, import: [link__Import]) on SCHEMA
+
+directive @tag(name: String!) repeatable on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @override(from: String!) on FIELD_DEFINITION
+
 type Student {
-  id: Float!
+  id: ID!
   name: String!
   age: Float!
   email: String!
@@ -13,11 +33,28 @@ type Student {
   dob: DateTime!
 }
 
+type FetchPaginatedStudentsOutput {
+  current: Float!
+  pageSize: Float!
+  totalPages: Float!
+  totalSize: Float!
+  data: [Student!]!
+}
+
 scalar DateTime
 
 type Query {
   getAllStudent: [Student!]!
-  getStudnetById(id: Int!): Student!
+  getStudentById(id: Int!): Student!
+  fetchPaginatedStudents(page: FetchPaginatedStudentsInput!): FetchPaginatedStudentsOutput!
+}
+
+input FetchPaginatedStudentsInput {
+  skip: Float!
+  pageSize: Float!
+  name: String
+  email: String
+  address: String
 }
 
 type Mutation {
@@ -39,3 +76,5 @@ input CreateStudentInput {
 input CreateBulkStudentInput {
   bulkCreateStudents: [CreateStudentInput!]!
 }
+
+scalar link__Import

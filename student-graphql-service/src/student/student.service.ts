@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
+import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
+import { FetchPaginatedStudentsOutput } from './dto/fetch-paginated-students-output';
 
 @Injectable()
 export class StudentService {
@@ -17,6 +19,7 @@ export class StudentService {
   // create new student record
   create(createStudentInput: CreateStudentInput): Promise<Student> {
     try {
+      this.logger.log('Creating new student started.');
       const student: Student =
         this.studentRepository.create(createStudentInput);
       //  calculate age -> assume dob is not this year
@@ -32,6 +35,7 @@ export class StudentService {
   //  create multiple student records
   bulkCreate(createStudentInput: CreateBulkStudentInput) {
     try {
+      this.logger.log('BulkCreate new students started.');
       const students: Student[] = createStudentInput.bulkCreateStudents.map(
         (student: CreateStudentInput) => {
           const singleStd = this.studentRepository.create(student);
@@ -50,10 +54,12 @@ export class StudentService {
   }
   //  get all students
   findAll(): Promise<Student[]> {
+    this.logger.log('Fetching All Students.');
     return this.studentRepository.find();
   }
   //  get student by id
   findOne(id: number): Promise<Student> {
+    this.logger.log('Find student for ID: ' + id + '.');
     return this.studentRepository.findOne({ where: { id } });
   }
 
@@ -92,5 +98,30 @@ export class StudentService {
         this.logger.error('Failed to delete student : ' + error.message);
         return null;
       });
+  }
+
+  async fetchPaginatedStudents(
+    page: FetchPaginatedStudentsInput,
+  ): Promise<FetchPaginatedStudentsOutput> {
+    try {
+      this.logger.log('Fetching paginated students : ' + JSON.stringify(page));
+      const [data, count] = await this.studentRepository.findAndCount({
+        skip: page.skip > 0 ? page.skip : 0,
+        take: page.pageSize,
+      });
+      return {
+        totalPages: Math.ceil(count / page.pageSize),
+        current: page.skip,
+        pageSize: page.pageSize,
+        totalSize: count,
+        data: data,
+      };
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch paginated students : ' + error.message,
+      );
+
+      return null;
+    }
   }
 }

@@ -1,20 +1,8 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  Inject,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import {
   AddEvent,
   CancelEvent,
-  CreateFormGroupArgs,
   EditEvent,
   GridComponent,
   GridDataResult,
@@ -24,16 +12,16 @@ import {
   SaveEvent,
 } from '@progress/kendo-angular-grid';
 // import { State } from './models';
-import { process, State } from '@progress/kendo-data-query';
-import { CreateStudent, CreateStudentResponse, Student } from './models';
-import { map, Observable, Subscription } from 'rxjs';
+import { State } from '@progress/kendo-data-query';
 import { Apollo } from 'apollo-angular';
+import { Observable, Subscription } from 'rxjs';
 import {
   CREATE_STUDENT,
   DELETE_STUDENT,
   GET_ALL_STUDENTS,
   UPDATE_STUDENT,
 } from './graphql.operations';
+import { CreateStudent, CreateStudentResponse, UpdateStudentResponse } from './models';
 
 @Component({
   selector: 'app-root',
@@ -95,6 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // this.editService.read();
   }
 
+  // hnadle update student
   public editHandler(args: EditEvent): void {
     const { dataItem } = args;
     this.closeEditor(args.sender);
@@ -110,6 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.editDataID = dataItem.id;
     args.sender.editRow(args.rowIndex, this.formGroup);
   }
+  //  handle create new user
   public addHandler(args: AddEvent): void {
     this.closeEditor(args.sender);
 
@@ -123,6 +113,7 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     args.sender.addRow(this.formGroup);
   }
+  // save the data and sync with database
   public saveHandler({ sender, rowIndex, formGroup, isNew }: SaveEvent): void {
     const student: CreateStudent[] = formGroup.value;
     sender.closeRow(rowIndex);
@@ -152,7 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
     } else {
       //  update existing record
       this.apollo
-        .mutate<CreateStudentResponse>({
+        .mutate<UpdateStudentResponse>({
           mutation: UPDATE_STUDENT,
           variables: {
             id: this.editDataID,
@@ -161,7 +152,8 @@ export class AppComponent implements OnInit, OnDestroy {
         })
         .subscribe(
           ({ data }) => {
-            const updatedStd = data?.createStudent;
+            const updatedStd = data?.updateStudent;
+            console.log(`Student updated successfully. : ${JSON.stringify(data)}`);
             this.gridData = this.gridData.map((item) => {
               if (item.id === updatedStd?.id) {
                 return updatedStd;
@@ -178,7 +170,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
   public removeHandler(args: RemoveEvent): void {
-    console.log('removeHandler : ', args);
+    // console.log('removeHandler : ', args);
     this.apollo
       .mutate({
         mutation: DELETE_STUDENT,

@@ -26,6 +26,9 @@ export interface State {
 export interface CreateStudentResponse {
   createStudent: Student;
 }
+export interface UpdateStudentResponse {
+  updateStudent: Student;
+}
 
 export interface FetchPaginatedStudentsInput {
   skip: number;

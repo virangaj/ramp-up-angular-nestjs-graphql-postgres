@@ -20,17 +20,13 @@ import {
   DELETE_STUDENT,
   GET_ALL_STUDENTS,
   UPDATE_STUDENT,
-} from './graphql.operations';
+} from './query/students.gql';
 import {
   CreateStudent,
   CreateStudentResponse,
   UpdateStudentResponse,
 } from './models';
-import {
-  NotificationRef,
-  NotificationService,
-  NotificationSettings,
-} from '@progress/kendo-angular-notification';
+import { NotificationsService } from './services/notifications.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -40,12 +36,11 @@ import {
 export class AppComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   public gridData: any[] = [];
-  public notificationReference: NotificationRef;
   private querySubscription: Subscription;
   constructor(
     private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef,
-    private notificationService: NotificationService
+    private notificationService: NotificationsService,
   ) {}
 
   title = 'Student Management';
@@ -64,12 +59,6 @@ export class AppComponent implements OnInit, OnDestroy {
     sort: [],
     skip: 0,
     take: 5,
-  };
-  public notificationState: NotificationSettings = {
-    content: 'Your data has been saved.',
-    type: { style: 'success', icon: true },
-    animation: { type: 'slide', duration: 400 },
-    hideAfter: 3000,
   };
   ngOnInit() {
     this.querySubscription = this.apollo
@@ -150,11 +139,11 @@ export class AppComponent implements OnInit, OnDestroy {
             } else {
               this.gridData = [newStd];
             }
-            this.showNotification("success")
+            this.notificationService.showNotification("success")
             this.cdr.detectChanges();
           },
           (error) => {
-            this.showNotification("error")
+            this.notificationService.showNotification("error")
             console.log('there was an error sending the query', error);
           }
         );
@@ -164,7 +153,7 @@ export class AppComponent implements OnInit, OnDestroy {
         .mutate<UpdateStudentResponse>({
           mutation: UPDATE_STUDENT,
           variables: {
-            id: this.editDataID,
+            id: Number(this.editDataID),
             input: student,
           },
         })
@@ -179,11 +168,11 @@ export class AppComponent implements OnInit, OnDestroy {
             });
             this.editDataID = undefined;
             this.cdr.detectChanges();
-            this.showNotification("success")
+            this.notificationService.showNotification("success")
           },
           (error) => {
             console.log('there was an error sending the query', error);
-            this.showNotification("error")
+            this.notificationService.showNotification("error")
 
           }
         );
@@ -195,7 +184,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .mutate({
         mutation: DELETE_STUDENT,
         variables: {
-          id: args.dataItem.id,
+          id: Number(args.dataItem.id),
         },
       })
       .subscribe(
@@ -204,11 +193,11 @@ export class AppComponent implements OnInit, OnDestroy {
             (item) => item.id !== args.dataItem.id
           );
           this.cdr.detectChanges();
-          this.showNotification("success", "Data has been deleted successfully.")
+          this.notificationService.showNotification("success", "Data has been deleted successfully.")
         },
         (error) => {
           console.log('there was an error sending the query', error);
-          this.showNotification("error")
+          this.notificationService.showNotification("error")
         }
       );
   }
@@ -222,17 +211,5 @@ export class AppComponent implements OnInit, OnDestroy {
     this.formGroup = null;
   }
 
-  public showNotification(type: 'success' | 'error', message?: string): void {
-    switch (type) {
-      case 'success':
-        this.notificationState.content = message ? message : 'Data has been saved successfully.';
-        this.notificationState.type = { style: 'success', icon: true };
-        break;
-      case 'error':
-        this.notificationState.content = 'Oops, something went wrong...';
-        this.notificationState.type = { style: 'error', icon: true };
-        break;
-    }
-    this.notificationService.show(this.notificationState);
-  }
+  
 }

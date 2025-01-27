@@ -4,6 +4,7 @@ import { FileuploadController } from './fileupload.controller';
 import { BullModule } from '@nestjs/bull';
 import { FILEUPLOAD_QUEUE } from 'src/constants/constant';
 import { FileUploadConsumer } from './fileupload.consumer';
+import { FileUploadGateway } from './fileupload.gateway';
 
 @Module({
   imports: [
@@ -19,12 +20,12 @@ import { FileUploadConsumer } from './fileupload.consumer';
         attempts: 3,
         backoff: {
           type: 'fixed',
-          delay: 5000,
+          delay: 10000,
         },
       },
     }),
   ],
   controllers: [FileuploadController],
-  providers: [FileuploadService, FileUploadConsumer],
+  providers: [FileuploadService, FileUploadConsumer, FileUploadGateway],
 })
 export class FileuploadModule {}

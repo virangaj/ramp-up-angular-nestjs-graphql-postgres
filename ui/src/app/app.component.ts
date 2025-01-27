@@ -27,6 +27,7 @@ import {
   UpdateStudentResponse,
 } from './models';
 import { NotificationsService } from './services/notifications.service';
+import { SocketService } from './services/socket.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationsService,
+    private socketService: SocketService
   ) {}
 
   title = 'Student Management';
@@ -70,6 +72,12 @@ export class AppComponent implements OnInit, OnDestroy {
         this.gridData = data.getAllStudent;
         this.cdr.detectChanges();
       });
+    this.socketService.onConnectedMessage((msg: any) => {
+      console.log('socketService : ', msg);
+    });
+    this.socketService.onFilUploadStatus((msg: any) => {
+      console.log('socketService : ', msg);
+    });
   }
   ngOnDestroy() {
     this.querySubscription.unsubscribe();
@@ -139,11 +147,11 @@ export class AppComponent implements OnInit, OnDestroy {
             } else {
               this.gridData = [newStd];
             }
-            this.notificationService.showNotification("success")
+            this.notificationService.showNotification('success');
             this.cdr.detectChanges();
           },
           (error) => {
-            this.notificationService.showNotification("error")
+            this.notificationService.showNotification('error');
             console.log('there was an error sending the query', error);
           }
         );
@@ -168,12 +176,11 @@ export class AppComponent implements OnInit, OnDestroy {
             });
             this.editDataID = undefined;
             this.cdr.detectChanges();
-            this.notificationService.showNotification("success")
+            this.notificationService.showNotification('success');
           },
           (error) => {
             console.log('there was an error sending the query', error);
-            this.notificationService.showNotification("error")
-
+            this.notificationService.showNotification('error');
           }
         );
     }
@@ -193,11 +200,14 @@ export class AppComponent implements OnInit, OnDestroy {
             (item) => item.id !== args.dataItem.id
           );
           this.cdr.detectChanges();
-          this.notificationService.showNotification("success", "Data has been deleted successfully.")
+          this.notificationService.showNotification(
+            'success',
+            'Data has been deleted successfully.'
+          );
         },
         (error) => {
           console.log('there was an error sending the query', error);
-          this.notificationService.showNotification("error")
+          this.notificationService.showNotification('error');
         }
       );
   }
@@ -210,6 +220,4 @@ export class AppComponent implements OnInit, OnDestroy {
     this.editedRowIndex = undefined;
     this.formGroup = null;
   }
-
-  
 }

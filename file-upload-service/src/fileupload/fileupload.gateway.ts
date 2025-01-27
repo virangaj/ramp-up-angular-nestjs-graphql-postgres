@@ -10,7 +10,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class FileUploadGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {

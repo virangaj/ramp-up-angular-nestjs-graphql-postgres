@@ -28,6 +28,8 @@ import {
 } from './models';
 import { NotificationsService } from './services/notifications.service';
 import { SocketService } from './services/socket.service';
+
+import { FileRestrictions } from '@progress/kendo-angular-upload';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -62,21 +64,24 @@ export class AppComponent implements OnInit, OnDestroy {
     skip: 0,
     take: 5,
   };
+  uploadSaveUrl = 'http://localhost:3002/upload';
+  uploadRemoveUrl = 'removeUrl';
+
+  myRestrictions: FileRestrictions = {
+    allowedExtensions: ['.jpg', '.png'],
+  };
   ngOnInit() {
-    this.querySubscription = this.apollo
-      .watchQuery<any>({
-        query: GET_ALL_STUDENTS,
-      })
-      .valueChanges.subscribe(({ data, loading }) => {
-        this.loading = loading;
-        this.gridData = data.getAllStudent;
-        this.cdr.detectChanges();
-      });
+    this.loadData();
     this.socketService.onConnectedMessage((msg: any) => {
       console.log('socketService : ', msg);
     });
     this.socketService.onFilUploadStatus((msg: any) => {
       console.log('socketService : ', msg);
+      this.notificationService.showNotification(
+        'success',
+        'File uploaded successfully'
+      );
+      this.loadData();
     });
   }
   ngOnDestroy() {
@@ -96,6 +101,20 @@ export class AppComponent implements OnInit, OnDestroy {
     // this.editService.read();
   }
 
+  public loadData(): void {
+    console.log('loadData triggered');
+
+    this.querySubscription = this.apollo
+      .watchQuery<any>({
+        query: GET_ALL_STUDENTS,
+      })
+      .valueChanges.subscribe(({ data, loading }) => {
+        this.loading = loading;
+        this.gridData = data.getAllStudent;
+        this.cdr.detectChanges();
+      });
+    console.log('loadData : ', this.gridData);
+  }
   // hnadle update student
   public editHandler(args: EditEvent): void {
     const { dataItem } = args;

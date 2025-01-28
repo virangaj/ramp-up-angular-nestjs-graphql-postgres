@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { inject, NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -10,14 +10,18 @@ import { HttpLink } from 'apollo-angular/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { UploadComponent } from '@progress/kendo-angular-upload';
+import { FileUploadComponent } from './file-upload/file-upload.component';
+import { UploadInterceptor } from './upload.interceptor';
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, FileUploadComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     GridModule,
     CommonModule,
     ReactiveFormsModule,
+    UploadComponent,
   ],
   providers: [
     provideHttpClient(),
@@ -29,6 +33,11 @@ import { provideAnimations } from '@angular/platform-browser/animations';
       };
     }),
     provideAnimations(),
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: UploadInterceptor,
+    //   multi: true,
+    // }
   ],
   bootstrap: [AppComponent],
 })

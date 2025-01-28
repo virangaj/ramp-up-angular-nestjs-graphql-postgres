@@ -73,10 +73,10 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadData();
     this.socketService.onConnectedMessage((msg: any) => {
-      console.log('socketService : ', msg);
+      console.debug('socketService : ', msg);
     });
     this.socketService.onFilUploadStatus((msg: any) => {
-      console.log('socketService : ', msg);
+      console.debug('socketService : ', msg);
       this.notificationService.showNotification(
         'success',
         'File uploaded successfully'
@@ -90,30 +90,31 @@ export class AppComponent implements OnInit, OnDestroy {
   public view: Observable<GridDataResult> | undefined;
 
   public onStateChange(state: State): void {
-    console.log('onStateChange : ', state);
+    console.debug('onStateChange : ', state);
 
     this.gridState = {
       ...state,
       skip: state.skip ?? 0,
       take: state.take ?? 5,
     };
-
-    // this.editService.read();
   }
 
   public loadData(): void {
-    console.log('loadData triggered');
+    console.debug('loadData triggered');
 
     this.querySubscription = this.apollo
       .watchQuery<any>({
         query: GET_ALL_STUDENTS,
+        fetchPolicy: 'cache-and-network',
       })
       .valueChanges.subscribe(({ data, loading }) => {
         this.loading = loading;
+        console.debug('data.getAllStudent : ', data.getAllStudent);
+
         this.gridData = data.getAllStudent;
         this.cdr.detectChanges();
       });
-    console.log('loadData : ', this.gridData);
+    console.debug('loadData : ', this.gridData);
   }
   // hnadle update student
   public editHandler(args: EditEvent): void {
@@ -171,7 +172,7 @@ export class AppComponent implements OnInit, OnDestroy {
           },
           (error) => {
             this.notificationService.showNotification('error');
-            console.log('there was an error sending the query', error);
+            console.debug('there was an error sending the query', error);
           }
         );
     } else {
@@ -198,14 +199,14 @@ export class AppComponent implements OnInit, OnDestroy {
             this.notificationService.showNotification('success');
           },
           (error) => {
-            console.log('there was an error sending the query', error);
+            console.debug('there was an error sending the query', error);
             this.notificationService.showNotification('error');
           }
         );
     }
   }
   public removeHandler(args: RemoveEvent): void {
-    // console.log('removeHandler : ', args);
+    // console.debug('removeHandler : ', args);
     this.apollo
       .mutate({
         mutation: DELETE_STUDENT,
@@ -225,7 +226,7 @@ export class AppComponent implements OnInit, OnDestroy {
           );
         },
         (error) => {
-          console.log('there was an error sending the query', error);
+          console.debug('there was an error sending the query', error);
           this.notificationService.showNotification('error');
         }
       );

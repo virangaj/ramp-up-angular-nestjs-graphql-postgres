@@ -1,14 +1,13 @@
-import { InjectQueue, Process, Processor } from '@nestjs/bull';
-import { FILEUPLOAD_QUEUE } from '../constants/constant';
-import { Job, Queue } from 'bull';
-import { Logger } from '@nestjs/common';
-import * as XLSX from 'xlsx';
-import * as fs from 'fs';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client/core';
+import { InjectQueue, Process, Processor } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
+import { Job, Queue } from 'bull';
+import * as fs from 'fs';
 import {
-  CreateBulkStudentInput,
-  StudentInput,
+  StudentInput
 } from 'src/types/create-bulk-student.input';
+import * as XLSX from 'xlsx';
+import { FILEUPLOAD_QUEUE } from '../constants/constant';
 import { FileUploadGateway } from './fileupload.gateway';
 @Processor(FILEUPLOAD_QUEUE)
 export class FileUploadConsumer {

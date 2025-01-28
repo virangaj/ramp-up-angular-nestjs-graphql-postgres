@@ -1,17 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateStudentInput } from './dto/create-student.input';
-import { UpdateStudentInput } from './dto/update-student.input';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
+import { CreateStudentInput } from './dto/create-student.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
 import { FetchPaginatedStudentsOutput } from './dto/fetch-paginated-students-output';
+import { Student } from './entities/student.entity';
 
 @Injectable()
 export class StudentService {
   constructor(
-    @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(Student) private studentRepository: Repository<Student>
   ) {}
   private readonly logger = new Logger(StudentService.name, {
     timestamp: true,

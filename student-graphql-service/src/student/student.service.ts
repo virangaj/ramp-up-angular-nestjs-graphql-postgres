@@ -24,6 +24,7 @@ export class StudentService {
       //  calculate age -> assume dob is not this year
       let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
       student.age = age;
+      student.createdAt = new Date();
       const createdStudent = this.studentRepository.save(student);
       this.logger.log('Student created successfully.');
       return createdStudent;
@@ -42,6 +43,7 @@ export class StudentService {
           let age =
             new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
           singleStd.age = age;
+          singleStd.createdAt = new Date();
           return singleStd;
         },
       );
@@ -79,8 +81,10 @@ export class StudentService {
         ...updateStudentInput,
       };
       const age =
-        new Date().getFullYear() - new Date(updateStudentInput.dob).getFullYear();
+        new Date().getFullYear() -
+        new Date(updateStudentInput.dob).getFullYear();
       student.age = age;
+      student.updatedAt = new Date();
       const updatedStudent = await this.studentRepository.save(updateStudent);
       this.logger.log('Student updated successfully.');
 
@@ -121,6 +125,7 @@ export class StudentService {
       const [data, count] = await this.studentRepository.findAndCount({
         skip: page.skip > 0 ? page.skip : 0,
         take: page.pageSize,
+        order: { createdAt: 'DESC' },
       });
       return {
         totalPages: Math.ceil(count / page.pageSize),

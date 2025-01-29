@@ -35,7 +35,7 @@ describe('StudentService', () => {
             delete: jest.fn(),
             findAndCount: jest.fn(),
           },
-        }
+        },
       ],
     }).compile();
 
@@ -47,11 +47,11 @@ describe('StudentService', () => {
 
   describe('Create Student', () => {
     it('Should create a student', async () => {
-     
-
-      const createdStudent = {
+      const createdStudent: Student = {
         id: 1,
         age: 0,
+        createdAt: undefined,
+        updatedAt: undefined,
         ...studentInput,
       };
 
@@ -59,6 +59,7 @@ describe('StudentService', () => {
       const expectedAge =
         new Date().getFullYear() - studentInput.dob.getFullYear();
       createdStudent.age = expectedAge;
+      createdStudent.createdAt = new Date();
       jest.spyOn(studentRepository, 'save').mockResolvedValue(createdStudent);
 
       const result = await service.create(studentInput);
@@ -67,11 +68,11 @@ describe('StudentService', () => {
       expect(result).toEqual(createdStudent);
     });
     it('should throw an error when student creation fails', async () => {
-
       jest.spyOn(studentRepository, 'create').mockReturnValue({
         ...studentInput,
         age: 29,
         id: 1,
+        createdAt: undefined,
       });
       jest
         .spyOn(studentRepository, 'save')
@@ -96,6 +97,7 @@ describe('StudentService', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996@we'),
+        createdAt: new Date(),
       };
       const updateStudentInput: CreateStudentInput = {
         name: 'saman',
@@ -117,8 +119,9 @@ describe('StudentService', () => {
         new Date().getFullYear() -
         new Date(updateStudentInput.dob).getFullYear();
       updateStudent.age = age;
+      updateStudent.updatedAt = new Date();
       jest.spyOn(studentRepository, 'save').mockResolvedValue(updateStudent);
-      const result = await service.update(1, updateStudentInput);
+      const result = await service.update(1, updateStudent);
       expect(studentRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
       });
@@ -138,6 +141,7 @@ describe('StudentService', () => {
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
         age: 28,
+        createdAt: new Date(),
       };
 
       jest.spyOn(studentRepository, 'findOne').mockResolvedValue(student);
@@ -166,6 +170,7 @@ describe('StudentService', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
+          createdAt: new Date(),
         },
         {
           id: 2,
@@ -176,6 +181,7 @@ describe('StudentService', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
+          createdAt: new Date(),
         },
       ];
 
@@ -198,6 +204,7 @@ describe('StudentService', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        createdAt: new Date(),
       };
       jest.spyOn(studentRepository, 'findOne').mockResolvedValue(studentData);
       const result = await service.findOne(1);
@@ -225,6 +232,7 @@ describe('StudentService', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        createdAt: new Date(),
       };
       const expectedOutput: FetchPaginatedStudentsOutput = {
         current: 1,
@@ -240,6 +248,7 @@ describe('StudentService', () => {
       expect(studentRepository.findAndCount).toHaveBeenCalledWith({
         skip: paginatedQuery.skip > 0 ? paginatedQuery.skip : 0,
         take: paginatedQuery.pageSize,
+        order: { createdAt: 'DESC' },
       });
 
       expect(result).toEqual(expectedOutput);

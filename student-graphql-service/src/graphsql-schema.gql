@@ -31,6 +31,8 @@ type Student {
   address: String!
   mobileNo: String!
   dob: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime
 }
 
 type FetchPaginatedStudentsOutput {

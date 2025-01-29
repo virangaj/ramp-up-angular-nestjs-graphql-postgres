@@ -48,6 +48,8 @@ describe('StudentResolver', () => {
       const createdStudent: Student = {
         id: 1,
         age: 25,
+        createdAt: new Date(),
+        updatedAt: undefined,
         ...studentInput,
       };
 
@@ -105,11 +107,13 @@ describe('StudentResolver', () => {
         {
           id: 1,
           age: 29,
+          createdAt: new Date(),
           ...studentArray[0],
         },
         {
           id: 2,
           age: 26,
+          createdAt: new Date(),
           ...studentArray[1],
         },
       ];
@@ -170,6 +174,8 @@ describe('StudentResolver', () => {
       const createdStudent: Student = {
         id: 1,
         age: 25,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         ...updateInput,
       };
 
@@ -209,6 +215,7 @@ describe('StudentResolver', () => {
         mobileNo: '0715586362',
         age: 29,
         dob: new Date('1996-02-25'),
+        createdAt: new Date(),
       };
 
       jest.spyOn(studentService, 'remove').mockResolvedValue(studentToDelete);
@@ -241,6 +248,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
+          createdAt: new Date(),
         },
         {
           id: 2,
@@ -251,6 +259,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
+          createdAt: new Date(),
         },
       ];
       jest.spyOn(studentService, 'findAll').mockResolvedValue(studentArray);
@@ -270,6 +279,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        createdAt: new Date(),
       };
       jest.spyOn(studentService, 'findOne').mockResolvedValue(studentData);
       const result = await resolver.findOne(1);
@@ -301,6 +311,7 @@ describe('StudentResolver', () => {
             address: 'No. 53, Galle Road, Dehiwala',
             mobileNo: '0715586362',
             dob: new Date('1996-02-25'),
+            createdAt: new Date(),
           },
         ],
       };
@@ -329,6 +340,7 @@ describe('StudentResolver', () => {
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
         age: 25,
+        createdAt: new Date(),
       };
       jest.spyOn(studentService, 'findOne').mockResolvedValue(student);
       const result = await resolver.resolveReference(reference);

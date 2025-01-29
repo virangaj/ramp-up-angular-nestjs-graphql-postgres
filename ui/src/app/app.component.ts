@@ -100,8 +100,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public loadData(): void {
-    console.debug('loadData triggered');
-
     this.querySubscription = this.apollo
       .watchQuery<any>({
         query: GET_ALL_STUDENTS,
@@ -109,12 +107,9 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .valueChanges.subscribe(({ data, loading }) => {
         this.loading = loading;
-        console.debug('data.getAllStudent : ', data.getAllStudent);
-
         this.gridData = data.getAllStudent;
         this.cdr.detectChanges();
       });
-    console.debug('loadData : ', this.gridData);
   }
   // hnadle update student
   public editHandler(args: EditEvent): void {

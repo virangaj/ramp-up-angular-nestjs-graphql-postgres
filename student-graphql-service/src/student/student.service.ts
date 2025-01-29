@@ -10,7 +10,7 @@ import { Student } from './entities/student.entity';
 @Injectable()
 export class StudentService {
   constructor(
-    @InjectRepository(Student) private studentRepository: Repository<Student>
+    @InjectRepository(Student) private studentRepository: Repository<Student>,
   ) {}
   private readonly logger = new Logger(StudentService.name, {
     timestamp: true,
@@ -29,6 +29,7 @@ export class StudentService {
       return createdStudent;
     } catch (error) {
       this.logger.error('Failed to create student: ' + error.message);
+      throw new Error('Unable to create student. Please try again later.');
     }
   }
   //  create multiple student records
@@ -49,6 +50,7 @@ export class StudentService {
       return createdStudents;
     } catch (error) {
       this.logger.error('Failed to create students: ' + error.message);
+      throw new Error('Unable to create students. Please try again later.');
     }
   }
   //  get all students
@@ -62,18 +64,30 @@ export class StudentService {
     return this.studentRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateStudentInput: CreateStudentInput): Promise<Student> {
+  async update(
+    id: number,
+    updateStudentInput: CreateStudentInput,
+  ): Promise<Student> {
     try {
-      const student: Student =
-        this.studentRepository.create(updateStudentInput);
-      student.id = id;
-      let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
+      // Fetch the existing student
+      const student = await this.studentRepository.findOne({ where: { id } });
+      if (!student) {
+        throw new Error('Student not found');
+      }
+      const updateStudent: Student = {
+        ...student,
+        ...updateStudentInput,
+      };
+      const age =
+        new Date().getFullYear() - new Date(updateStudentInput.dob).getFullYear();
       student.age = age;
-      const updatedStudent = this.studentRepository.save(student);
+      const updatedStudent = await this.studentRepository.save(updateStudent);
       this.logger.log('Student updated successfully.');
+
       return updatedStudent;
     } catch (error) {
       this.logger.error('Failed to update student : ' + error.message);
+      throw new Error('Unable to update students. Please try again later.');
     }
   }
   //  delete student by id
@@ -95,7 +109,7 @@ export class StudentService {
       })
       .catch((error) => {
         this.logger.error('Failed to delete student : ' + error.message);
-        return null;
+        throw new Error('Unable to delete students. Please try again later.');
       });
   }
 

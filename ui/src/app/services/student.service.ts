@@ -8,6 +8,7 @@ import {
 } from '../models';
 import {
   CREATE_STUDENT,
+  DELETE_STUDENT,
   FETCH_PAGINATED_STUDENTS,
   UPDATE_STUDENT,
 } from '../query/students.gql';
@@ -17,11 +18,11 @@ import {
 })
 export class StudentService {
   constructor(private grapghqlService: GraphqlService) {}
-
+  //  fetch paginated students
   async fetchPaginatedStudents(
     inputData: FetchPaginatedStudentsInput
   ): Promise<FetchPaginatedStudentsOutput> {
-    let paginatedStudents: FetchPaginatedStudentsInput;
+    let paginatedStudents: FetchPaginatedStudentsOutput;
     return this.grapghqlService
       .executeQuery({
         query: FETCH_PAGINATED_STUDENTS,
@@ -33,15 +34,16 @@ export class StudentService {
         },
       })
       .then((res: any) => {
+        //  return the final result
         paginatedStudents = res.data['fetchPaginatedStudents'];
         return paginatedStudents;
       })
       .catch((err) => {
         console.error(err);
-        return err;
+        throw new Error('Failed to fetch students: ' + err.message);
       });
   }
-
+  //  create new student
   async createNewStudent(student: CreateStudent[]): Promise<Student> {
     return this.grapghqlService
       .mutateQuery({
@@ -55,11 +57,12 @@ export class StudentService {
       })
       .catch((err) => {
         console.error(err);
-        return err;
+        throw new Error('Failed to create student: ' + err.message);
       });
   }
 
-  async updateStudent(id:number, student: CreateStudent[]): Promise<Student> {
+  //  update student
+  async updateStudent(id: number, student: CreateStudent[]): Promise<Student> {
     return this.grapghqlService
       .mutateQuery({
         mutation: UPDATE_STUDENT,
@@ -73,7 +76,24 @@ export class StudentService {
       })
       .catch((err) => {
         console.error(err);
-        return err;
+        throw new Error('Failed to update student: ' + err.message);
+      });
+  }
+  //  remove student
+  async removeStudent(id: number): Promise<Student> {
+    return this.grapghqlService
+      .mutateQuery({
+        mutation: DELETE_STUDENT,
+        variables: {
+          id: id,
+        },
+      })
+      .then((res: any) => {
+        return res.data['removeStudent'];
+      })
+      .catch((err) => {
+        console.error(err);
+        throw new Error('Failed to delete student: ' + err.message);
       });
   }
 }

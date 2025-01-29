@@ -83,8 +83,8 @@ export class StudentService {
       const age =
         new Date().getFullYear() -
         new Date(updateStudentInput.dob).getFullYear();
-      student.age = age;
-      student.updatedAt = new Date();
+      updateStudent.age = age;
+      updateStudent.updatedAt = new Date();
       const updatedStudent = await this.studentRepository.save(updateStudent);
       this.logger.log('Student updated successfully.');
 

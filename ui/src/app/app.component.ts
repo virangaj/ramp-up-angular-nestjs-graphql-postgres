@@ -196,34 +196,29 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }
   }
-  public removeHandler(args: RemoveEvent): void {
+  public async removeHandler(args: RemoveEvent): Promise<void> {
     // console.debug('removeHandler : ', args);
-    this.apollo
-      .mutate({
-        mutation: DELETE_STUDENT,
-        variables: {
-          id: Number(args.dataItem.id),
-        },
-      })
-      .subscribe(
-        ({ data }) => {
-          this.gridData = {
-            data: this.gridData.data.filter(
-              (item) => item.id !== args.dataItem.id
-            ),
-            total: this.gridData.total - 1,
-          };
-          this.cdr.detectChanges();
-          this.notificationService.showNotification(
-            'success',
-            'Data has been deleted successfully.'
-          );
-        },
-        (error) => {
-          console.debug('there was an error sending the query', error);
-          this.notificationService.showNotification('error');
-        }
+    try {
+      const deletedStd: Student = await this.studentFacade.removeStudent(
+        Number(args.dataItem.id)
       );
+      if (deletedStd != null) {
+        this.gridData = {
+          data: this.gridData.data.filter(
+            (item) => item.id !== args.dataItem.id
+          ),
+          total: this.gridData.total - 1,
+        };
+        this.cdr.detectChanges();
+        this.notificationService.showNotification(
+          'success',
+          'Data has been deleted successfully.'
+        );
+      }
+    } catch (error) {
+      console.debug('there was an error sending the query', error);
+      this.notificationService.showNotification('error');
+    }
   }
   public cancelHandler(args: CancelEvent): void {
     // close the editor for the given row

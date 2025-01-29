@@ -3,7 +3,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { inject, NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { InMemoryCache } from '@apollo/client/core';
+import { DefaultOptions, InMemoryCache } from '@apollo/client/core';
 import { GridModule } from '@progress/kendo-angular-grid';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
@@ -13,6 +13,16 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { UploadComponent } from '@progress/kendo-angular-upload';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 import { environment } from '../environments/environment';
+const defaultOptions: DefaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'no-cache',
+    errorPolicy: 'ignore',
+  },
+  query: {
+    fetchPolicy: 'no-cache',
+    errorPolicy: 'all',
+  },
+};
 @NgModule({
   declarations: [AppComponent, FileUploadComponent],
   imports: [
@@ -30,10 +40,10 @@ import { environment } from '../environments/environment';
       return {
         link: httpLink.create({ uri: environment.GRAPHQL_GATEWAY }),
         cache: new InMemoryCache(),
+        defaultOptions: defaultOptions,
       };
     }),
     provideAnimations(),
-    
   ],
   bootstrap: [AppComponent],
 })

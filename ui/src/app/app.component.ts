@@ -25,6 +25,7 @@ import {
 import {
   CreateStudent,
   CreateStudentResponse,
+  FetchPaginatedStudentsOutput,
   UpdateStudentResponse,
 } from './models';
 import { NotificationsService } from './services/notifications.service';
@@ -32,6 +33,7 @@ import { SocketService } from './services/socket.service';
 
 import { FileRestrictions } from '@progress/kendo-angular-upload';
 import { environment } from '../environments/environment';
+import { StudentFacade } from './facades/student.facade';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -46,7 +48,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationsService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private studentFacade: StudentFacade
   ) {}
 
   title = 'Student Management';
@@ -99,29 +102,41 @@ export class AppComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
-  public loadData(): void {
-    this.querySubscription = this.apollo
-      .watchQuery<any>({
-        query: FETCH_PAGINATED_STUDENTS,
-        variables: {
-          page: {
-            skip: this.gridState.skip,
-            pageSize: this.gridState.take,
-          },
-        },
-        fetchPolicy: 'cache-and-network',
-      })
-      .valueChanges.subscribe(({ data, loading }) => {
-        console.debug('data : ', data);
-        this.loading = loading;
-        this.gridData = {
-          data: data.fetchPaginatedStudents.data,
-          total:
-            data.fetchPaginatedStudents.totalPages *
-            data.fetchPaginatedStudents.pageSize,
-        };
-        this.cdr.detectChanges();
+  public async loadData(): Promise<void> {
+    // this.querySubscription = this.apollo
+    //   .watchQuery<any>({
+    //     query: FETCH_PAGINATED_STUDENTS,
+    //     variables: {
+    //       page: {
+    //         skip: this.gridState.skip,
+    //         pageSize: this.gridState.take,
+    //       },
+    //     },
+    //     fetchPolicy: 'cache-and-network',
+    //   })
+    //   .valueChanges.subscribe(({ data, loading }) => {
+    //     console.debug('data : ', data);
+    //     this.loading = loading;
+    //     this.gridData = {
+    //       data: data.fetchPaginatedStudents.data,
+    //       total:
+    //         data.fetchPaginatedStudents.totalPages *
+    //         data.fetchPaginatedStudents.pageSize,
+    //     };
+    //     this.cdr.detectChanges();
+    //   });
+    this.loading = true;
+    const data: FetchPaginatedStudentsOutput =
+      await this.studentFacade.getPaginatedStudents({
+        skip: this.gridState.skip,
+        pageSize: this.gridState.take,
       });
+    this.gridData = {
+      data: data.data,
+      total: data.totalPages * data.pageSize,
+    };
+    this.cdr.detectChanges();
+    this.loading = false;
   }
   // hnadle update student
   public editHandler(args: EditEvent): void {

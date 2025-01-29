@@ -26,6 +26,7 @@ import {
   CreateStudent,
   CreateStudentResponse,
   FetchPaginatedStudentsOutput,
+  Student,
   UpdateStudentResponse,
 } from './models';
 import { NotificationsService } from './services/notifications.service';
@@ -103,28 +104,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public async loadData(): Promise<void> {
-    // this.querySubscription = this.apollo
-    //   .watchQuery<any>({
-    //     query: FETCH_PAGINATED_STUDENTS,
-    //     variables: {
-    //       page: {
-    //         skip: this.gridState.skip,
-    //         pageSize: this.gridState.take,
-    //       },
-    //     },
-    //     fetchPolicy: 'cache-and-network',
-    //   })
-    //   .valueChanges.subscribe(({ data, loading }) => {
-    //     console.debug('data : ', data);
-    //     this.loading = loading;
-    //     this.gridData = {
-    //       data: data.fetchPaginatedStudents.data,
-    //       total:
-    //         data.fetchPaginatedStudents.totalPages *
-    //         data.fetchPaginatedStudents.pageSize,
-    //     };
-    //     this.cdr.detectChanges();
-    //   });
     this.loading = true;
     const data: FetchPaginatedStudentsOutput =
       await this.studentFacade.getPaginatedStudents({
@@ -169,65 +148,52 @@ export class AppComponent implements OnInit, OnDestroy {
     args.sender.addRow(this.formGroup);
   }
   // save the data and sync with database
-  public saveHandler({ sender, rowIndex, formGroup, isNew }: SaveEvent): void {
+  public async saveHandler({
+    sender,
+    rowIndex,
+    formGroup,
+    isNew,
+  }: SaveEvent): Promise<void> {
     const student: CreateStudent[] = formGroup.value;
     sender.closeRow(rowIndex);
     if (isNew) {
-      //  create new record
-      this.apollo
-        .mutate<CreateStudentResponse>({
-          mutation: CREATE_STUDENT,
-          variables: {
-            input: student,
-          },
-        })
-        .subscribe(
-          ({ data }) => {
-            const newStd = data?.createStudent;
-            if (this.gridData.data.length > 0) {
-              this.gridData = {
-                data: [newStd, ...this.gridData.data],
-                total: this.gridData.total + 1,
-              };
-            } else {
-              this.gridData = { data: [newStd], total: 1 };
-            }
-            this.notificationService.showNotification('success');
-            this.cdr.detectChanges();
-          },
-          (error) => {
-            this.notificationService.showNotification('error');
-            console.debug('there was an error sending the query', error);
-          }
+      try {
+        const newStd: Student = await this.studentFacade.createNewStudent(
+          student
         );
+        if (this.gridData.data.length > 0) {
+          this.gridData = {
+            data: [newStd, ...this.gridData.data],
+            total: this.gridData.total + 1,
+          };
+          this.notificationService.showNotification('success');
+          this.cdr.detectChanges();
+        } else {
+          this.gridData = { data: [newStd], total: 1 };
+        }
+      } catch (e) {
+        console.error(e);
+        this.notificationService.showNotification('error');
+      }
     } else {
-      //  update existing record
-      this.apollo
-        .mutate<UpdateStudentResponse>({
-          mutation: UPDATE_STUDENT,
-          variables: {
-            id: Number(this.editDataID),
-            input: student,
-          },
-        })
-        .subscribe(
-          ({ data }) => {
-            const updatedStd = data?.updateStudent;
-            this.gridData.data = this.gridData.data.map((item) => {
-              if (item.id === updatedStd?.id) {
-                return updatedStd;
-              }
-              return item;
-            });
-            this.editDataID = undefined;
-            this.cdr.detectChanges();
-            this.notificationService.showNotification('success');
-          },
-          (error) => {
-            console.debug('there was an error sending the query', error);
-            this.notificationService.showNotification('error');
-          }
+      try {
+        const updatedStd: Student = await this.studentFacade.updateStudent(
+          Number(this.editDataID),
+          student
         );
+        this.gridData.data = this.gridData.data.map((item) => {
+          if (item.id === updatedStd?.id) {
+            return updatedStd;
+          }
+          return item;
+        });
+        this.editDataID = undefined;
+        this.cdr.detectChanges();
+        this.notificationService.showNotification('success');
+      } catch (e) {
+        console.error(e);
+        this.notificationService.showNotification('error');
+      }
     }
   }
   public removeHandler(args: RemoveEvent): void {

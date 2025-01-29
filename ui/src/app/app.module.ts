@@ -12,7 +12,7 @@ import { AppComponent } from './app.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { UploadComponent } from '@progress/kendo-angular-upload';
 import { FileUploadComponent } from './file-upload/file-upload.component';
-import { UploadInterceptor } from './upload.interceptor';
+import { environment } from '../environments/environment';
 @NgModule({
   declarations: [AppComponent, FileUploadComponent],
   imports: [
@@ -28,16 +28,12 @@ import { UploadInterceptor } from './upload.interceptor';
     provideApollo(() => {
       const httpLink = inject(HttpLink);
       return {
-        link: httpLink.create({ uri: 'http://localhost:3000/graphql' }),
+        link: httpLink.create({ uri: environment.GRAPHQL_GATEWAY }),
         cache: new InMemoryCache(),
       };
     }),
     provideAnimations(),
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: UploadInterceptor,
-    //   multi: true,
-    // }
+    
   ],
   bootstrap: [AppComponent],
 })

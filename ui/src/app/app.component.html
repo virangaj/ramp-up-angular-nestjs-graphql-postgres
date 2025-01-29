@@ -69,7 +69,7 @@
     <app-file-upload></app-file-upload>
     <kendo-grid
       *ngIf="!loading"
-      [kendoGridBinding]="gridData"
+      [data]="gridData"
       [filterable]="true"
       [height]="650"
       [pageable]="true"

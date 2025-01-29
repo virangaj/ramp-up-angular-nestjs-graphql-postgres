@@ -18,6 +18,7 @@ import { Observable, Subscription } from 'rxjs';
 import {
   CREATE_STUDENT,
   DELETE_STUDENT,
+  FETCH_PAGINATED_STUDENTS,
   GET_ALL_STUDENTS,
   UPDATE_STUDENT,
 } from './query/students.gql';
@@ -30,6 +31,7 @@ import { NotificationsService } from './services/notifications.service';
 import { SocketService } from './services/socket.service';
 
 import { FileRestrictions } from '@progress/kendo-angular-upload';
+import { environment } from '../environments/environment';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -38,7 +40,7 @@ import { FileRestrictions } from '@progress/kendo-angular-upload';
 })
 export class AppComponent implements OnInit, OnDestroy {
   loading: boolean = true;
-  public gridData: any[] = [];
+  public gridData: GridDataResult;
   private querySubscription: Subscription;
   constructor(
     private readonly apollo: Apollo,
@@ -64,12 +66,9 @@ export class AppComponent implements OnInit, OnDestroy {
     skip: 0,
     take: 5,
   };
-  uploadSaveUrl = 'http://localhost:3002/upload';
+  uploadSaveUrl = environment.FILE_UPLOAD_API;
   uploadRemoveUrl = 'removeUrl';
 
-  myRestrictions: FileRestrictions = {
-    allowedExtensions: ['.jpg', '.png'],
-  };
   ngOnInit() {
     this.loadData();
     this.socketService.onConnectedMessage((msg: any) => {
@@ -97,17 +96,30 @@ export class AppComponent implements OnInit, OnDestroy {
       skip: state.skip ?? 0,
       take: state.take ?? 5,
     };
+    this.loadData();
   }
 
   public loadData(): void {
     this.querySubscription = this.apollo
       .watchQuery<any>({
-        query: GET_ALL_STUDENTS,
+        query: FETCH_PAGINATED_STUDENTS,
+        variables: {
+          page: {
+            skip: this.gridState.skip,
+            pageSize: this.gridState.take,
+          },
+        },
         fetchPolicy: 'cache-and-network',
       })
       .valueChanges.subscribe(({ data, loading }) => {
+        console.debug('data : ', data);
         this.loading = loading;
-        this.gridData = data.getAllStudent;
+        this.gridData = {
+          data: data.fetchPaginatedStudents.data,
+          total:
+            data.fetchPaginatedStudents.totalPages *
+            data.fetchPaginatedStudents.pageSize,
+        };
         this.cdr.detectChanges();
       });
   }
@@ -157,10 +169,13 @@ export class AppComponent implements OnInit, OnDestroy {
         .subscribe(
           ({ data }) => {
             const newStd = data?.createStudent;
-            if (this.gridData.length > 0) {
-              this.gridData = [...this.gridData, newStd];
+            if (this.gridData.data.length > 0) {
+              this.gridData = {
+                data: [newStd, ...this.gridData.data],
+                total: this.gridData.total + 1,
+              };
             } else {
-              this.gridData = [newStd];
+              this.gridData = { data: [newStd], total: 1 };
             }
             this.notificationService.showNotification('success');
             this.cdr.detectChanges();
@@ -183,7 +198,7 @@ export class AppComponent implements OnInit, OnDestroy {
         .subscribe(
           ({ data }) => {
             const updatedStd = data?.updateStudent;
-            this.gridData = this.gridData.map((item) => {
+            this.gridData.data = this.gridData.data.map((item) => {
               if (item.id === updatedStd?.id) {
                 return updatedStd;
               }
@@ -211,9 +226,12 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .subscribe(
         ({ data }) => {
-          this.gridData = this.gridData.filter(
-            (item) => item.id !== args.dataItem.id
-          );
+          this.gridData = {
+            data: this.gridData.data.filter(
+              (item) => item.id !== args.dataItem.id
+            ),
+            total: this.gridData.total - 1,
+          };
           this.cdr.detectChanges();
           this.notificationService.showNotification(
             'success',

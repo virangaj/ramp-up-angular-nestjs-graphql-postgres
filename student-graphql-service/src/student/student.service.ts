@@ -125,7 +125,6 @@ export class StudentService {
       const [data, count] = await this.studentRepository.findAndCount({
         skip: page.skip > 0 ? page.skip : 0,
         take: page.pageSize,
-        order: { createdAt: 'DESC' },
       });
       return {
         totalPages: Math.ceil(count / page.pageSize),

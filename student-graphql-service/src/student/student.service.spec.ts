@@ -248,7 +248,6 @@ describe('StudentService', () => {
       expect(studentRepository.findAndCount).toHaveBeenCalledWith({
         skip: paginatedQuery.skip > 0 ? paginatedQuery.skip : 0,
         take: paginatedQuery.pageSize,
-        order: { createdAt: 'DESC' },
       });
 
       expect(result).toEqual(expectedOutput);

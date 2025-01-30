@@ -1,12 +1,20 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
-import { AppComponent } from './app.component';
 import { ApolloTestingModule } from 'apollo-angular/testing';
+import { AppComponent } from './app.component';
+import { FileUploadComponent } from './file-upload/file-upload.component';
+
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterModule.forRoot([]), ApolloTestingModule],
-      declarations: [AppComponent],
+      imports: [
+        RouterModule.forRoot([]),
+        ApolloTestingModule,
+        HttpClientTestingModule,
+      ],
+      declarations: [AppComponent, FileUploadComponent],
+      teardown: { destroyAfterEach: false },
     }).compileComponents();
   });
 
@@ -26,6 +34,8 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, ui');
+    expect(compiled.querySelector('h1')?.textContent).toContain(
+      'Student Management'
+    );
   });
 });

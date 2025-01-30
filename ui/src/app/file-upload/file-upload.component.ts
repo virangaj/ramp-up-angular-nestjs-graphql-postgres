@@ -23,14 +23,14 @@ export class FileUploadComponent {
       const formData = new FormData();
       formData.append('file', file);
 
-      const upload$ = this.http
+      const upload = this.http
         .post('http://localhost:3002/fileupload/data', formData, {
           reportProgress: true,
           observe: 'events',
         })
         .pipe(finalize(() => this.reset()));
 
-      this.uploadSub = upload$.subscribe((event) => {
+      this.uploadSub = upload.subscribe((event) => {
         if (event.type == HttpEventType.UploadProgress) {
           let total = Number(event.total);
           this.uploadProgress = Math.round(100 * (event.loaded / total));

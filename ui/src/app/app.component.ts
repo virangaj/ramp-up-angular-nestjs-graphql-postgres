@@ -13,26 +13,15 @@ import {
 } from '@progress/kendo-angular-grid';
 // import { State } from './models';
 import { State } from '@progress/kendo-data-query';
-import { Apollo } from 'apollo-angular';
 import { Observable, Subscription } from 'rxjs';
 import {
-  CREATE_STUDENT,
-  DELETE_STUDENT,
-  FETCH_PAGINATED_STUDENTS,
-  GET_ALL_STUDENTS,
-  UPDATE_STUDENT,
-} from './query/students.gql';
-import {
   CreateStudent,
-  CreateStudentResponse,
   FetchPaginatedStudentsOutput,
-  Student,
-  UpdateStudentResponse,
+  Student
 } from './models';
 import { NotificationsService } from './services/notifications.service';
 import { SocketService } from './services/socket.service';
 
-import { FileRestrictions } from '@progress/kendo-angular-upload';
 import { environment } from '../environments/environment';
 import { StudentFacade } from './facades/student.facade';
 @Component({
@@ -46,14 +35,13 @@ export class AppComponent implements OnInit, OnDestroy {
   public gridData: GridDataResult;
   private querySubscription: Subscription;
   constructor(
-    private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationsService,
     private socketService: SocketService,
     private studentFacade: StudentFacade
   ) {}
 
-  title = 'Student Management';
+  public title = 'Student Management';
   public type: PagerType = 'numeric';
   public buttonCount = 5;
   public info = true;

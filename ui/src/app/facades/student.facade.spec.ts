@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 
-import { StudentService } from './student.service';
+import { StudentFacade } from './student.facade';
+import { Apollo } from 'apollo-angular';
 
-describe('StudentService', () => {
-  let service: StudentService;
+describe('StudentFacade', () => {
+  let service: StudentFacade;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(StudentService);
+    TestBed.configureTestingModule({
+      providers: [{ provide: Apollo, useValue: {} }],
+    });
+    service = TestBed.inject(StudentFacade);
   });
 
   it('should be created', () => {

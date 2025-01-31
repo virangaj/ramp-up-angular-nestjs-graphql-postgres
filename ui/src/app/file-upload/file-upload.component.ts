@@ -34,16 +34,12 @@ export class FileUploadComponent {
         if (event.type == HttpEventType.UploadProgress) {
           let total = Number(event.total);
           this.uploadProgress = Math.round(100 * (event.loaded / total));
+          console.log("Upload progress: " + Math.round(100 * (event.loaded / total)) + "%");
+
         }
       });
     }
   }
-
-  cancelUpload() {
-    this.uploadSub && this.uploadSub.unsubscribe();
-    this.reset();
-  }
-
   reset() {
     this.uploadProgress = null;
     this.uploadSub = null;

@@ -13,6 +13,8 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { UploadComponent } from '@progress/kendo-angular-upload';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 import { environment } from '../environments/environment';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 const defaultOptions: DefaultOptions = {
   watchQuery: {
     fetchPolicy: 'no-cache',
@@ -32,6 +34,7 @@ const defaultOptions: DefaultOptions = {
     CommonModule,
     ReactiveFormsModule,
     UploadComponent,
+    MatProgressBarModule,
   ],
   providers: [
     provideHttpClient(),
@@ -44,6 +47,7 @@ const defaultOptions: DefaultOptions = {
       };
     }),
     provideAnimations(),
+    provideAnimationsAsync(),
   ],
   bootstrap: [AppComponent],
 })

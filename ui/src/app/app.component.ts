@@ -66,7 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.socketService.onConnectedMessage((msg: any) => {
       console.debug('socketService : ', msg);
     });
-    this.socketService.onFilUploadStatus((msg: any) => {
+    this.socketService.onFileUploadStatus((msg: any) => {
       console.debug('socketService : ', msg);
       this.notificationService.showNotification(
         'success',

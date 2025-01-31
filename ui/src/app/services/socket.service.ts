@@ -15,7 +15,12 @@ export class SocketService {
   onConnectedMessage(callback: (message: string) => void): void {
     this.socket.on('connected', callback);
   }
-  onFilUploadStatus(callback: (message: string) => void): void {
+  onFileUploadStatus(callback: (message: string) => void): void {
     this.socket.on('process-status', callback);
+  }
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   }
 }

@@ -8,7 +8,6 @@ import {
   providedIn: 'root',
 })
 export class NotificationsService {
-  public notificationReference: NotificationRef;
   constructor(private notificationService: NotificationService) {}
 
   public notificationState: NotificationSettings = {

@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateStudentInput } from './dto/create-student.input';
-import { UpdateStudentInput } from './dto/update-student.input';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
+import { CreateStudentInput } from './dto/create-student.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
 import { FetchPaginatedStudentsOutput } from './dto/fetch-paginated-students-output';
+import { Student } from './entities/student.entity';
 
 @Injectable()
 export class StudentService {
@@ -25,11 +24,13 @@ export class StudentService {
       //  calculate age -> assume dob is not this year
       let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
       student.age = age;
+      student.createdAt = new Date();
       const createdStudent = this.studentRepository.save(student);
       this.logger.log('Student created successfully.');
       return createdStudent;
     } catch (error) {
       this.logger.error('Failed to create student: ' + error.message);
+      throw new Error('Unable to create student. Please try again later.');
     }
   }
   //  create multiple student records
@@ -42,6 +43,7 @@ export class StudentService {
           let age =
             new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
           singleStd.age = age;
+          singleStd.createdAt = new Date();
           return singleStd;
         },
       );
@@ -50,6 +52,7 @@ export class StudentService {
       return createdStudents;
     } catch (error) {
       this.logger.error('Failed to create students: ' + error.message);
+      throw new Error('Unable to create students. Please try again later.');
     }
   }
   //  get all students
@@ -63,18 +66,32 @@ export class StudentService {
     return this.studentRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateStudentInput: CreateStudentInput): Promise<Student> {
+  async update(
+    id: number,
+    updateStudentInput: CreateStudentInput,
+  ): Promise<Student> {
     try {
-      const student: Student =
-        this.studentRepository.create(updateStudentInput);
-      student.id = id;
-      let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
-      student.age = age;
-      const updatedStudent = this.studentRepository.save(student);
+      // Fetch the existing student
+      const student = await this.studentRepository.findOne({ where: { id } });
+      if (!student) {
+        throw new Error('Student not found');
+      }
+      const updateStudent: Student = {
+        ...student,
+        ...updateStudentInput,
+      };
+      const age =
+        new Date().getFullYear() -
+        new Date(updateStudentInput.dob).getFullYear();
+      updateStudent.age = age;
+      updateStudent.updatedAt = new Date();
+      const updatedStudent = await this.studentRepository.save(updateStudent);
       this.logger.log('Student updated successfully.');
+
       return updatedStudent;
     } catch (error) {
       this.logger.error('Failed to update student : ' + error.message);
+      throw new Error('Unable to update students. Please try again later.');
     }
   }
   //  delete student by id
@@ -96,7 +113,7 @@ export class StudentService {
       })
       .catch((error) => {
         this.logger.error('Failed to delete student : ' + error.message);
-        return null;
+        throw new Error('Unable to delete students. Please try again later.');
       });
   }
 

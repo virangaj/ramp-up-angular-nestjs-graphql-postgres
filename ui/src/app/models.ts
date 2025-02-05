@@ -37,3 +37,11 @@ export interface FetchPaginatedStudentsInput {
   email?: string;
   address?: string;
 }
+
+export interface FetchPaginatedStudentsOutput {
+  current: number;
+  pageSize: number;
+  totalPages: number;
+  totalSize: number;
+  data: Student[];
+}

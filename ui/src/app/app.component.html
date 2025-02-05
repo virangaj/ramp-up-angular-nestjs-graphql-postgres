@@ -66,11 +66,12 @@
         <p>Loading, please wait...</p>
       </div>
     </div>
+    <app-file-upload></app-file-upload>
     <kendo-grid
       *ngIf="!loading"
-      [kendoGridBinding]="gridData"
+      [data]="gridData"
       [filterable]="true"
-      [height]="600"
+      [height]="650"
       [pageable]="true"
       [sortable]="true"
       [skip]="gridState.skip"

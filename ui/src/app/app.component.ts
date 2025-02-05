@@ -13,24 +13,17 @@ import {
 } from '@progress/kendo-angular-grid';
 // import { State } from './models';
 import { State } from '@progress/kendo-data-query';
-import { Apollo } from 'apollo-angular';
 import { Observable, Subscription } from 'rxjs';
 import {
-  CREATE_STUDENT,
-  DELETE_STUDENT,
-  GET_ALL_STUDENTS,
-  UPDATE_STUDENT,
-} from './graphql.operations';
-import {
   CreateStudent,
-  CreateStudentResponse,
-  UpdateStudentResponse,
+  FetchPaginatedStudentsOutput,
+  Student
 } from './models';
-import {
-  NotificationRef,
-  NotificationService,
-  NotificationSettings,
-} from '@progress/kendo-angular-notification';
+import { NotificationsService } from './services/notifications.service';
+import { SocketService } from './services/socket.service';
+
+import { environment } from '../environments/environment';
+import { StudentFacade } from './facades/student.facade';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -39,16 +32,16 @@ import {
 })
 export class AppComponent implements OnInit, OnDestroy {
   loading: boolean = true;
-  public gridData: any[] = [];
-  public notificationReference: NotificationRef;
+  public gridData: GridDataResult;
   private querySubscription: Subscription;
   constructor(
-    private readonly apollo: Apollo,
     private cdr: ChangeDetectorRef,
-    private notificationService: NotificationService
+    private notificationService: NotificationsService,
+    private socketService: SocketService,
+    private studentFacade: StudentFacade
   ) {}
 
-  title = 'Student Management';
+  public title = 'Student Management';
   public type: PagerType = 'numeric';
   public buttonCount = 5;
   public info = true;
@@ -65,22 +58,22 @@ export class AppComponent implements OnInit, OnDestroy {
     skip: 0,
     take: 5,
   };
-  public notificationState: NotificationSettings = {
-    content: 'Your data has been saved.',
-    type: { style: 'success', icon: true },
-    animation: { type: 'slide', duration: 400 },
-    hideAfter: 3000,
-  };
+  uploadSaveUrl = environment.FILE_UPLOAD_API;
+  uploadRemoveUrl = 'removeUrl';
+
   ngOnInit() {
-    this.querySubscription = this.apollo
-      .watchQuery<any>({
-        query: GET_ALL_STUDENTS,
-      })
-      .valueChanges.subscribe(({ data, loading }) => {
-        this.loading = loading;
-        this.gridData = data.getAllStudent;
-        this.cdr.detectChanges();
-      });
+    this.loadData();
+    this.socketService.onConnectedMessage((msg: any) => {
+      console.debug('socketService : ', msg);
+    });
+    this.socketService.onFileUploadStatus((msg: any) => {
+      console.debug('socketService : ', msg);
+      this.notificationService.showNotification(
+        'success',
+        'File uploaded successfully'
+      );
+      this.loadData();
+    });
   }
   ngOnDestroy() {
     this.querySubscription.unsubscribe();
@@ -88,17 +81,30 @@ export class AppComponent implements OnInit, OnDestroy {
   public view: Observable<GridDataResult> | undefined;
 
   public onStateChange(state: State): void {
-    console.log('onStateChange : ', state);
+    console.debug('onStateChange : ', state);
 
     this.gridState = {
       ...state,
       skip: state.skip ?? 0,
       take: state.take ?? 5,
     };
-
-    // this.editService.read();
+    this.loadData();
   }
 
+  public async loadData(): Promise<void> {
+    this.loading = true;
+    const data: FetchPaginatedStudentsOutput =
+      await this.studentFacade.getPaginatedStudents({
+        skip: this.gridState.skip,
+        pageSize: this.gridState.take,
+      });
+    this.gridData = {
+      data: data.data,
+      total: data.totalPages * data.pageSize,
+    };
+    this.cdr.detectChanges();
+    this.loading = false;
+  }
   // hnadle update student
   public editHandler(args: EditEvent): void {
     const { dataItem } = args;
@@ -130,87 +136,77 @@ export class AppComponent implements OnInit, OnDestroy {
     args.sender.addRow(this.formGroup);
   }
   // save the data and sync with database
-  public saveHandler({ sender, rowIndex, formGroup, isNew }: SaveEvent): void {
+  public async saveHandler({
+    sender,
+    rowIndex,
+    formGroup,
+    isNew,
+  }: SaveEvent): Promise<void> {
     const student: CreateStudent[] = formGroup.value;
     sender.closeRow(rowIndex);
     if (isNew) {
-      //  create new record
-      this.apollo
-        .mutate<CreateStudentResponse>({
-          mutation: CREATE_STUDENT,
-          variables: {
-            input: student,
-          },
-        })
-        .subscribe(
-          ({ data }) => {
-            const newStd = data?.createStudent;
-            if (this.gridData.length > 0) {
-              this.gridData = [...this.gridData, newStd];
-            } else {
-              this.gridData = [newStd];
-            }
-            this.showNotification("success")
-            this.cdr.detectChanges();
-          },
-          (error) => {
-            this.showNotification("error")
-            console.log('there was an error sending the query', error);
-          }
+      try {
+        const newStd: Student = await this.studentFacade.createNewStudent(
+          student
         );
+        if (this.gridData.data.length > 0) {
+          this.gridData = {
+            data: [newStd, ...this.gridData.data],
+            total: this.gridData.total + 1,
+          };
+          this.notificationService.showNotification('success');
+          this.cdr.detectChanges();
+        } else {
+          this.gridData = { data: [newStd], total: 1 };
+        }
+      } catch (e) {
+        console.error(e);
+        this.notificationService.showNotification('error');
+      }
     } else {
-      //  update existing record
-      this.apollo
-        .mutate<UpdateStudentResponse>({
-          mutation: UPDATE_STUDENT,
-          variables: {
-            id: this.editDataID,
-            input: student,
-          },
-        })
-        .subscribe(
-          ({ data }) => {
-            const updatedStd = data?.updateStudent;
-            this.gridData = this.gridData.map((item) => {
-              if (item.id === updatedStd?.id) {
-                return updatedStd;
-              }
-              return item;
-            });
-            this.editDataID = undefined;
-            this.cdr.detectChanges();
-            this.showNotification("success")
-          },
-          (error) => {
-            console.log('there was an error sending the query', error);
-            this.showNotification("error")
-
-          }
+      try {
+        const updatedStd: Student = await this.studentFacade.updateStudent(
+          Number(this.editDataID),
+          student
         );
+        this.gridData.data = this.gridData.data.map((item) => {
+          if (item.id === updatedStd?.id) {
+            return updatedStd;
+          }
+          return item;
+        });
+        this.editDataID = undefined;
+        this.cdr.detectChanges();
+        this.notificationService.showNotification('success');
+      } catch (e) {
+        console.error(e);
+        this.notificationService.showNotification('error');
+      }
     }
   }
-  public removeHandler(args: RemoveEvent): void {
-    // console.log('removeHandler : ', args);
-    this.apollo
-      .mutate({
-        mutation: DELETE_STUDENT,
-        variables: {
-          id: args.dataItem.id,
-        },
-      })
-      .subscribe(
-        ({ data }) => {
-          this.gridData = this.gridData.filter(
-            (item) => item.id !== args.dataItem.id
-          );
-          this.cdr.detectChanges();
-          this.showNotification("success", "Data has been deleted successfully.")
-        },
-        (error) => {
-          console.log('there was an error sending the query', error);
-          this.showNotification("error")
-        }
+  public async removeHandler(args: RemoveEvent): Promise<void> {
+    // console.debug('removeHandler : ', args);
+    try {
+      const deletedStd: Student = await this.studentFacade.removeStudent(
+        Number(args.dataItem.id)
       );
+      if (deletedStd != null) {
+        this.gridData = {
+          data: this.gridData.data.filter(
+            (item) => item.id !== args.dataItem.id
+          ),
+          total: this.gridData.total - 1,
+        };
+        this.cdr.detectChanges();
+        this.notificationService.showNotification(
+          'success',
+          'Data has been deleted successfully.'
+        );
+      }
+    } catch (error) {
+      console.debug('there was an error sending the query', error);
+      this.notificationService.showNotification('error');
+    }
   }
   public cancelHandler(args: CancelEvent): void {
     // close the editor for the given row
@@ -220,19 +216,5 @@ export class AppComponent implements OnInit, OnDestroy {
     grid.closeRow(rowIndex);
     this.editedRowIndex = undefined;
     this.formGroup = null;
-  }
-
-  public showNotification(type: 'success' | 'error', message?: string): void {
-    switch (type) {
-      case 'success':
-        this.notificationState.content = message ? message : 'Data has been saved successfully.';
-        this.notificationState.type = { style: 'success', icon: true };
-        break;
-      case 'error':
-        this.notificationState.content = 'Oops, something went wrong...';
-        this.notificationState.type = { style: 'error', icon: true };
-        break;
-    }
-    this.notificationService.show(this.notificationState);
   }
 }

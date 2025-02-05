@@ -5,7 +5,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Directive('@key(fields: "id")')
 @Entity()
 export class Student {
-  @Field(()=> ID)
+  @Field(() => ID)
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -36,4 +36,12 @@ export class Student {
   @Column({ type: 'timestamptz' })
   @Field(() => Date)
   dob: Date;
+
+  @Column({ type: 'timestamptz' })
+  @Field(() => Date)
+  createdAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
 }

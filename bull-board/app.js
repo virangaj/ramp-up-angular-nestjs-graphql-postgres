@@ -6,7 +6,7 @@ const { ExpressAdapter } = require("@bull-board/express");
 const Queue = require("bull");
 
 const app = express();
-const port = 3000;
+const port = 5000;
 
 // Connect to the existing queue
 const fileUploadQueue = new Queue("FILEUPLOAD_QUEUE", {

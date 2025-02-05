@@ -1,0 +1,128 @@
+<style>
+  :host {
+    --bright-blue: oklch(51.01% 0.274 263.83);
+    --electric-violet: oklch(53.18% 0.28 296.97);
+    --french-violet: oklch(47.66% 0.246 305.88);
+    --vivid-pink: oklch(69.02% 0.277 332.77);
+    --hot-red: oklch(61.42% 0.238 15.34);
+    --orange-red: oklch(63.32% 0.24 31.68);
+
+    --gray-900: oklch(19.37% 0.006 300.98);
+    --gray-700: oklch(36.98% 0.014 302.71);
+    --gray-400: oklch(70.9% 0.015 304.04);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+    width: 100%;
+  }
+  main {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: inherit;
+    position: relative;
+  }
+
+  .content {
+    width: 80%;
+    margin-bottom: 3rem;
+  }
+  .content h1 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .row-btn-section .button-container {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .row-btn-section .button-container button {
+    flex-shrink: 0;
+  }
+  .add-new {
+    width: 70px;
+  }
+</style>
+
+<main class="main">
+  <div class="content">
+    <h1>{{ title }}</h1>
+    <div *ngIf="loading">
+      <div class="loading-message">
+        <p>Loading, please wait...</p>
+      </div>
+    </div>
+    <app-file-upload></app-file-upload>
+    <kendo-grid
+      *ngIf="!loading"
+      [data]="gridData"
+      [filterable]="true"
+      [height]="650"
+      [pageable]="true"
+      [sortable]="true"
+      [skip]="gridState.skip"
+      [sort]="gridState.sort"
+      [pageSize]="gridState.take"
+      (dataStateChange)="onStateChange($event)"
+      (edit)="editHandler($event)"
+      (add)="addHandler($event)"
+      (cancel)="cancelHandler($event)"
+      (save)="saveHandler($event)"
+      (remove)="removeHandler($event)"
+    >
+      <ng-template kendoGridToolbarTemplate>
+        <button kendoGridAddCommand class="add-new">Add new</button>
+      </ng-template>
+      <kendo-grid-column
+        field="id"
+        title="ID"
+        [width]="55"
+        [filterable]="false"
+      >
+      </kendo-grid-column>
+      <kendo-grid-column field="name" title="Name"> </kendo-grid-column>
+      <kendo-grid-column field="email" title="Email"> </kendo-grid-column>
+      <kendo-grid-column field="gender" title="Gender"> </kendo-grid-column>
+      <kendo-grid-column field="address" title="Address"> </kendo-grid-column>
+      <kendo-grid-column field="mobileNo" title="MobileNo"> </kendo-grid-column>
+      <kendo-grid-column
+        field="dob"
+        title="Date of Birth"
+        format="MM/dd/yyyy"
+        filter="date"
+      >
+      </kendo-grid-column>
+      <kendo-grid-column field="age" title="Age" filter="numeric">
+      </kendo-grid-column>
+      <kendo-grid-command-column title="command" [width]="220">
+        <ng-template kendoGridCellTemplate let-isNew="isNew">
+          <div class="command-buttons">
+            <button kendoGridEditCommand [primary]="true">Edit</button>
+            <button kendoGridRemoveCommand>Remove</button>
+            <button kendoGridSaveCommand [disabled]="formGroup?.invalid">
+              {{ isNew ? "Add" : "Update" }}
+            </button>
+            <button kendoGridCancelCommand>
+              {{ isNew ? "Discard changes" : "Cancel" }}
+            </button>
+          </div>
+        </ng-template>
+      </kendo-grid-command-column>
+    </kendo-grid>
+  </div>
+</main>
+<router-outlet />

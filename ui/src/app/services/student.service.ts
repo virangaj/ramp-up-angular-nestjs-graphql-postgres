@@ -44,7 +44,7 @@ export class StudentService {
       });
   }
   //  create new student
-  async createNewStudent(student: CreateStudent[]): Promise<Student> {
+  async createNewStudent(student: CreateStudent): Promise<Student> {
     return this.grapghqlService
       .mutateQuery({
         mutation: CREATE_STUDENT,
@@ -62,7 +62,7 @@ export class StudentService {
   }
 
   //  update student
-  async updateStudent(id: number, student: CreateStudent[]): Promise<Student> {
+  async updateStudent(id: number, student: CreateStudent): Promise<Student> {
     return this.grapghqlService
       .mutateQuery({
         mutation: UPDATE_STUDENT,

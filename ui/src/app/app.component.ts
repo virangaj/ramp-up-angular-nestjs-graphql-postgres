@@ -95,7 +95,10 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.loadData();
   }
-
+  public genderOptions = [
+    { text: 'Male', value: 'Male' },
+    { text: 'Female', value: 'Female' },
+  ];
   public async loadData(): Promise<void> {
     this.loading = true;
     const data: FetchPaginatedStudentsOutput =
@@ -147,7 +150,8 @@ export class AppComponent implements OnInit, OnDestroy {
     formGroup,
     isNew,
   }: SaveEvent): Promise<void> {
-    const student: CreateStudent[] = formGroup.value;
+    const student: CreateStudent = formGroup.value;
+    console.log(student);
     sender.closeRow(rowIndex);
     if (isNew) {
       try {

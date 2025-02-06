@@ -19,11 +19,11 @@ export class StudentFacade {
     return this.studentServie.fetchPaginatedStudents(inputData);
   }
   //  create new student
-  async createNewStudent(student: CreateStudent[]): Promise<Student> {
+  async createNewStudent(student: CreateStudent): Promise<Student> {
     return this.studentServie.createNewStudent(student);
   }
   //  update student
-  async updateStudent(id: number, student: CreateStudent[]): Promise<Student> {
+  async updateStudent(id: number, student: CreateStudent): Promise<Student> {
     return this.studentServie.updateStudent(id, student);
   }
   // remove student

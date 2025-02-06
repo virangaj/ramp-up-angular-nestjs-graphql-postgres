@@ -54,6 +54,8 @@ export class AppComponent implements OnInit, OnDestroy {
     skip: 0,
     take: 5,
   };
+  public opened = false;
+  public deletedId: number;
   uploadSaveUrl = environment.FILE_UPLOAD_API;
   uploadRemoveUrl = 'removeUrl';
 
@@ -189,15 +191,18 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   public async removeHandler(args: RemoveEvent): Promise<void> {
     // console.debug('removeHandler : ', args);
+    this.deletedId = args.dataItem.id;
+    // open the delete confirmation dialog
+    this.open();
+  }
+  public async deleteApprove(): Promise<void> {
     try {
       const deletedStd: Student = await this.studentFacade.removeStudent(
-        Number(args.dataItem.id)
+        Number(this.deletedId)
       );
       if (deletedStd != null) {
         this.gridData = {
-          data: this.gridData.data.filter(
-            (item) => item.id !== args.dataItem.id
-          ),
+          data: this.gridData.data.filter((item) => item.id !== this.deletedId),
           total: this.gridData.total - 1,
         };
         this.cdr.detectChanges();
@@ -210,6 +215,14 @@ export class AppComponent implements OnInit, OnDestroy {
       console.debug('there was an error sending the query', error);
       this.notificationService.showNotification('error');
     }
+    this.opened = false;
+  }
+
+  public open(): void {
+    this.opened = true;
+  }
+  public close(): void {
+    this.opened = false;
   }
   public cancelHandler(args: CancelEvent): void {
     // close the editor for the given row

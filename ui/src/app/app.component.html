@@ -123,6 +123,15 @@
         </ng-template>
       </kendo-grid-command-column>
     </kendo-grid>
+
+
+    <kendo-dialog title="Please confirm" *ngIf="opened" (close)="close()">
+      <p>Are you sure you want to continue?</p>
+      <kendo-dialog-actions>
+        <button kendoButton (click)="close()">No</button>
+        <button kendoButton (click)="deleteApprove()" themeColor="primary">Yes</button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
   </div>
 </main>
 <router-outlet />

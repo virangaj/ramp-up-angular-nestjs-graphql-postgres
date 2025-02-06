@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { DefaultOptions, InMemoryCache } from '@apollo/client/core';
 import { GridModule } from '@progress/kendo-angular-grid';
+import { DialogModule } from '@progress/kendo-angular-dialog';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { AppRoutingModule } from './app-routing.module';
@@ -31,6 +32,7 @@ const defaultOptions: DefaultOptions = {
     BrowserModule,
     AppRoutingModule,
     GridModule,
+    DialogModule,
     CommonModule,
     ReactiveFormsModule,
     UploadComponent,

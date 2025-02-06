@@ -44,7 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public pageSizes = [2, 5, 10, 20];
   public previousNext = true;
   public position: PagerPosition = 'bottom';
-  private editedRowIndex: number | undefined = undefined;
+  public editedRowIndex: number | undefined = undefined;
   public editDataID: number | undefined = undefined;
   public pageSize = 5;
   public skip = 0;
@@ -215,7 +215,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // close the editor for the given row
     this.closeEditor(args.sender, args.rowIndex);
   }
-  private closeEditor(grid: GridComponent, rowIndex = this.editedRowIndex) {
+  public closeEditor(grid: GridComponent, rowIndex = this.editedRowIndex) {
     grid.closeRow(rowIndex);
     this.editedRowIndex = undefined;
     this.formGroup = null;

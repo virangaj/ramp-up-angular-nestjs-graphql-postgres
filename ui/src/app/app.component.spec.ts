@@ -1,11 +1,13 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { ApolloTestingModule } from 'apollo-angular/testing';
 import { AppComponent } from './app.component';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 
 describe('AppComponent', () => {
+  let component: AppComponent;
+  let fixture: ComponentFixture<AppComponent>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -16,6 +18,9 @@ describe('AppComponent', () => {
       declarations: [AppComponent, FileUploadComponent],
       teardown: { destroyAfterEach: false },
     }).compileComponents();
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
   it('should create the app', () => {
@@ -37,5 +42,30 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain(
       'Student Management'
     );
+  });
+  describe('onStateChange', () => {
+    it('should update gridState with default values when state is empty', () => {
+      spyOn(component as any, 'loadData');
+      component.onStateChange({});
+      expect(component.gridState).toEqual({
+        skip: 0,
+        take: 5,
+      });
+      expect(component.loadData).toHaveBeenCalledTimes(1);
+    });
+
+    it('should update gridState with provided skip and take values', () => {
+      spyOn(component as any, 'loadData');
+      const testState = {
+        skip: 10,
+        take: 20,
+      };
+      component.onStateChange(testState);
+      expect(component.gridState).toEqual({
+        skip: 10,
+        take: 20,
+      });
+      expect(component.loadData).toHaveBeenCalledTimes(1);
+    });
   });
 });

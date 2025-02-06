@@ -1,4 +1,4 @@
-FROM rampup-base as build
+FROM student-base:latest AS build
 
 WORKDIR /usr/src/app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm run build
 
-FROM rampup-prod as prod
+FROM student-prod as prod
 
 WORKDIR /usr/src/app
 

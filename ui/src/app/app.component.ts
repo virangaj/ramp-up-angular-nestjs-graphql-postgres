@@ -14,11 +14,7 @@ import {
 // import { State } from './models';
 import { State } from '@progress/kendo-data-query';
 import { Observable, Subscription } from 'rxjs';
-import {
-  CreateStudent,
-  FetchPaginatedStudentsOutput,
-  Student
-} from './models';
+import { CreateStudent, FetchPaginatedStudentsOutput, Student } from './models';
 import { NotificationsService } from './services/notifications.service';
 import { SocketService } from './services/socket.service';
 
@@ -68,11 +64,18 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     this.socketService.onFileUploadStatus((msg: any) => {
       console.debug('socketService : ', msg);
-      this.notificationService.showNotification(
-        'success',
-        'File uploaded successfully'
-      );
-      this.loadData();
+      if (msg.status === 400) {
+        this.notificationService.showNotification(
+          'error',
+          'File failed to uploaded'
+        );
+      } else {
+        this.notificationService.showNotification(
+          'success',
+          'File uploaded successfully'
+        );
+        this.loadData();
+      }
     });
   }
   ngOnDestroy() {
@@ -159,9 +162,9 @@ export class AppComponent implements OnInit, OnDestroy {
         } else {
           this.gridData = { data: [newStd], total: 1 };
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        this.notificationService.showNotification('error');
+        this.notificationService.showNotification('error', e.message);
       }
     } else {
       try {
@@ -178,9 +181,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.editDataID = undefined;
         this.cdr.detectChanges();
         this.notificationService.showNotification('success');
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        this.notificationService.showNotification('error');
+        this.notificationService.showNotification('error', e.message);
       }
     }
   }

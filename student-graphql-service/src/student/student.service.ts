@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
 import { CreateStudentInput } from './dto/create-student.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
@@ -11,6 +11,7 @@ import { Student } from './entities/student.entity';
 export class StudentService {
   constructor(
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    private dataSource: DataSource,
   ) {}
   private readonly logger = new Logger(StudentService.name, {
     timestamp: true,
@@ -24,6 +25,9 @@ export class StudentService {
       //  calculate age -> assume dob is not this year
       let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
       student.age = age;
+      if (age < 0) {
+        throw new Error('Invalid birthday.');
+      }
       student.createdAt = new Date();
       const createdStudent = this.studentRepository.save(student);
       this.logger.log('Student created successfully.');
@@ -34,24 +38,35 @@ export class StudentService {
     }
   }
   //  create multiple student records
-  bulkCreate(createStudentInput: CreateBulkStudentInput) {
+  async bulkCreate(createStudentInput: CreateBulkStudentInput) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       this.logger.log('BulkCreate new students started.');
-      const students: Student[] = createStudentInput.bulkCreateStudents.map(
-        (student: CreateStudentInput) => {
-          const singleStd = this.studentRepository.create(student);
-          let age =
-            new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
-          singleStd.age = age;
-          singleStd.createdAt = new Date();
-          return singleStd;
-        },
+      const students: Student[] = await Promise.all(
+        createStudentInput.bulkCreateStudents.map(
+          async (student: CreateStudentInput) => {
+            const singleStd = this.studentRepository.create(student);
+            let age =
+              new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
+            if (age < 0) {
+              await queryRunner.rollbackTransaction();
+              throw new Error('Invalid birthday.');
+            }
+            singleStd.age = age;
+            singleStd.createdAt = new Date();
+            return singleStd;
+          },
+        ),
       );
       const createdStudents = this.studentRepository.save(students);
+      await queryRunner.commitTransaction();
       this.logger.log('Students created successfully.');
       return createdStudents;
     } catch (error) {
       this.logger.error('Failed to create students: ' + error.message);
+      await queryRunner.rollbackTransaction();
       throw new Error('Unable to create students. Please try again later.');
     }
   }
@@ -83,6 +98,9 @@ export class StudentService {
       const age =
         new Date().getFullYear() -
         new Date(updateStudentInput.dob).getFullYear();
+      if (age < 0) {
+        throw new Error('Invalid birthday.');
+      }
       updateStudent.age = age;
       updateStudent.updatedAt = new Date();
       const updatedStudent = await this.studentRepository.save(updateStudent);

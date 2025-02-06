@@ -35,7 +35,6 @@ export class FileUploadComponent {
           let total = Number(event.total);
           this.uploadProgress = Math.round(100 * (event.loaded / total));
           console.log("Upload progress: " + Math.round(100 * (event.loaded / total)) + "%");
-
         }
       });
     }

@@ -14,6 +14,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
 
   student-service:
     build:
@@ -50,8 +58,18 @@ services:
       context: ./file-upload-service
       dockerfile: dockerfile
     container_name: file-upload-service
+    environment:
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
     ports:
       - "3002:3002"
+    depends_on:
+      - cache
     working_dir: /usr/src/app
     volumes:
       - ./src:/app/src
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local

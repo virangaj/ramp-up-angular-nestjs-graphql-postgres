@@ -175,4 +175,17 @@ export class StudentService {
       return null;
     }
   }
+
+  async forCourse(id: number): Promise<Student[]> {
+    try {
+      this.logger.log('Fetching students for course :'+ id);
+      const students = await this.studentRepository.find({
+        where: { courseId: id },
+      });
+      return students;
+    } catch (error) {
+      this.logger.error('Failed to fetch students for course :'+ error.message);
+      return null;
+    }
+  }
 }

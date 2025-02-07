@@ -124,6 +124,7 @@ export class AppComponent implements OnInit, OnDestroy {
       gender: new FormControl(dataItem.gender),
       mobileNo: new FormControl(dataItem.mobileNo),
       dob: new FormControl(dataItem.dob),
+      courseId: new FormControl(dataItem.courseId),
     });
     this.editedRowIndex = args.rowIndex;
     this.editDataID = dataItem.id;
@@ -138,6 +139,7 @@ export class AppComponent implements OnInit, OnDestroy {
       address: new FormControl(),
       email: new FormControl(),
       gender: new FormControl(),
+      courseId: new FormControl(),
       mobileNo: new FormControl(),
       dob: new FormControl(),
     });
@@ -150,7 +152,10 @@ export class AppComponent implements OnInit, OnDestroy {
     formGroup,
     isNew,
   }: SaveEvent): Promise<void> {
-    const student: CreateStudent = formGroup.value;
+    const student: CreateStudent = {
+      ...formGroup.value,
+      courseId: Number(formGroup.value.courseId),
+    };
     console.log(student);
     sender.closeRow(rowIndex);
     if (isNew) {

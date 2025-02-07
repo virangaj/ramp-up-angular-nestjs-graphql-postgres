@@ -11,6 +11,7 @@ export const GET_ALL_STUDENTS = gql`
       address
       mobileNo
       dob
+      courseId
     }
   }
 `;
@@ -26,6 +27,7 @@ export const CREATE_STUDENT = gql`
       address
       mobileNo
       dob
+      courseId
     }
   }
 `;
@@ -41,6 +43,7 @@ export const UPDATE_STUDENT = gql`
       address
       mobileNo
       dob
+      courseId
     }
   }
 `;
@@ -68,6 +71,7 @@ export const FETCH_PAGINATED_STUDENTS = gql`
         address
         mobileNo
         dob
+        courseId
       }
     }
   }

@@ -22,6 +22,7 @@ describe('StudentFacade', () => {
       address: '123 Street, City',
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
+      courseId: 1,
       age: 24,
     },
     {
@@ -32,6 +33,7 @@ describe('StudentFacade', () => {
       address: '456 Avenue, City',
       mobileNo: '0987654321',
       dob: new Date('2002-05-15'),
+      courseId: 1,
       age: 22,
     },
   ];
@@ -85,6 +87,7 @@ describe('StudentFacade', () => {
       email: 'john@example.com',
       gender: 'Male',
       address: '123 Street, City',
+      courseId: 1,
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
     };
@@ -103,6 +106,7 @@ describe('StudentFacade', () => {
       email: 'john@example.com',
       gender: 'Male',
       address: '123 Street, City',
+      courseId: 1,
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
     };

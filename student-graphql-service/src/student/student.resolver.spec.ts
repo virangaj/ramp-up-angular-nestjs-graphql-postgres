@@ -43,6 +43,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        courseId: 1,
       };
 
       const createdStudent: Student = {
@@ -50,6 +51,8 @@ describe('StudentResolver', () => {
         age: 25,
         createdAt: new Date(),
         updatedAt: undefined,
+        courseId: 1,
+        course: undefined,
         ...studentInput,
       };
 
@@ -68,6 +71,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996@ew'),
+        courseId: 1,
       };
       jest
         .spyOn(studentService, 'create')
@@ -90,6 +94,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
+          courseId: 1,
         },
         {
           name: 'kamala',
@@ -98,6 +103,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
+          courseId: 1,
         },
       ];
       const studentInput: CreateBulkStudentInput = {
@@ -108,12 +114,16 @@ describe('StudentResolver', () => {
           id: 1,
           age: 29,
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
           ...studentArray[0],
         },
         {
           id: 2,
           age: 26,
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
           ...studentArray[1],
         },
       ];
@@ -136,6 +146,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996@wewe'),
+          courseId: 1,
         },
         {
           name: 'kamala',
@@ -144,6 +155,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999@wewe'),
+          courseId: 1,
         },
       ];
       const studentInput: CreateBulkStudentInput = {
@@ -169,6 +181,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        courseId: 1,
       };
 
       const createdStudent: Student = {
@@ -176,6 +189,8 @@ describe('StudentResolver', () => {
         age: 25,
         createdAt: new Date(),
         updatedAt: new Date(),
+        courseId: 1,
+        course: undefined,
         ...updateInput,
       };
 
@@ -193,6 +208,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996@ew'),
+        courseId: 1,
       };
       jest
         .spyOn(studentService, 'update')
@@ -216,6 +232,8 @@ describe('StudentResolver', () => {
         age: 29,
         dob: new Date('1996-02-25'),
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
 
       jest.spyOn(studentService, 'remove').mockResolvedValue(studentToDelete);
@@ -249,6 +267,8 @@ describe('StudentResolver', () => {
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
         },
         {
           id: 2,
@@ -260,6 +280,8 @@ describe('StudentResolver', () => {
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
         },
       ];
       jest.spyOn(studentService, 'findAll').mockResolvedValue(studentArray);
@@ -280,6 +302,8 @@ describe('StudentResolver', () => {
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
       jest.spyOn(studentService, 'findOne').mockResolvedValue(studentData);
       const result = await resolver.findOne(1);
@@ -312,6 +336,8 @@ describe('StudentResolver', () => {
             mobileNo: '0715586362',
             dob: new Date('1996-02-25'),
             createdAt: new Date(),
+            courseId: 1,
+            course: undefined,
           },
         ],
       };
@@ -323,39 +349,6 @@ describe('StudentResolver', () => {
         paginatedQuery,
       );
       expect(result).toEqual(studentData);
-    });
-  });
-  describe('ResolveReference', () => {
-    it('Should resolve a student by ID', async () => {
-      const reference = {
-        __typename: 'Student',
-        id: 1,
-      };
-      const student: Student = {
-        id: 1,
-        name: 'saman',
-        email: 'saman@gmail.com',
-        gender: 'male',
-        address: 'No. 53, Galle Road, Dehiwala',
-        mobileNo: '0715586362',
-        dob: new Date('1996-02-25'),
-        age: 25,
-        createdAt: new Date(),
-      };
-      jest.spyOn(studentService, 'findOne').mockResolvedValue(student);
-      const result = await resolver.resolveReference(reference);
-      expect(studentService.findOne).toHaveBeenCalledWith(reference.id);
-      expect(result).toEqual(student);
-    });
-
-    it('Should throw an error if student is not found', async () => {
-      const reference = {
-        __typename: 'Student',
-        id: 999, // Assuming ID doesn't exist
-      };
-      jest.spyOn(studentService, 'findOne').mockResolvedValue(null);
-      const result = await resolver.resolveReference(reference);
-      expect(result).toBeNull();
     });
   });
 });

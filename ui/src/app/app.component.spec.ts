@@ -327,6 +327,7 @@ describe('AppComponent', () => {
         gender: 'Male',
         address: '123 Street',
         mobileNo: '1234567890',
+        courseId: 1,
         dob: new Date(),
       };
       newStudentMock = { id: 1, ...studentMock };
@@ -339,6 +340,7 @@ describe('AppComponent', () => {
         address: new FormControl(studentMock.address),
         mobileNo: new FormControl(studentMock.mobileNo),
         dob: new FormControl(studentMock.dob),
+        courseId: new FormControl(studentMock.courseId),
       });
     });
     it('should create a new student and update gridData', async () => {

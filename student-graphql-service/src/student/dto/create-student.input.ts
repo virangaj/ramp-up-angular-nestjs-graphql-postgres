@@ -19,4 +19,8 @@ export class CreateStudentInput {
 
   @Field(() => Date)
   dob: Date;
+
+  @Field()
+  courseId: number;
+
 }

@@ -22,6 +22,11 @@ directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUM
 
 directive @override(from: String!) on FIELD_DEFINITION
 
+type Course {
+  id: ID!
+  students: [Student!]!
+}
+
 type Student {
   id: ID!
   name: String!
@@ -33,6 +38,8 @@ type Student {
   dob: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime
+  course: Course!
+  courseId: Float!
 }
 
 type FetchPaginatedStudentsOutput {

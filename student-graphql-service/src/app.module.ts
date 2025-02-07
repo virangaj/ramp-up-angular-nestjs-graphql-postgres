@@ -6,6 +6,7 @@ import { join } from 'path';
 import { Client } from 'pg';
 import { DateTimeScalar } from './graphql/scalars/date-time.scalar';
 import { StudentModule } from './student/student.module';
+import { Course } from './student/entities/course.entity';
 @Module({
   imports: [
     StudentModule,
@@ -14,6 +15,7 @@ import { StudentModule } from './student/student.module';
       autoSchemaFile: join(process.cwd(), 'src/graphsql-schema.gql'),
       playground: true,
       introspection: true,
+      buildSchemaOptions: { orphanedTypes: [Course] },
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {

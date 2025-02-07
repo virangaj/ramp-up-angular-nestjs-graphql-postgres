@@ -1,4 +1,13 @@
-import { Resolver, Query, Mutation, Args, Int, ResolveReference } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveReference,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { StudentService } from './student.service';
 import { Student } from './entities/student.entity';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -6,6 +15,7 @@ import { UpdateStudentInput } from './dto/update-student.input';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
 import { FetchPaginatedStudentsOutput } from './dto/fetch-paginated-students-output';
+import { Course } from './entities/course.entity';
 
 @Resolver(() => Student)
 export class StudentResolver {
@@ -54,8 +64,8 @@ export class StudentResolver {
     return this.studentService.fetchPaginatedStudents(page);
   }
 
-  @ResolveReference()
-  resolveReference(reference: { __typename: string; id: number }): Promise<Student> {
-    return this.studentService.findOne(reference.id);
+  @ResolveField()
+  course(@Parent() student: Student) {
+    return { _typename: 'Course', id: student.courseId };
   }
 }

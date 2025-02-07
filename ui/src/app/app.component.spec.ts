@@ -4,24 +4,43 @@ import { RouterModule } from '@angular/router';
 import { ApolloTestingModule } from 'apollo-angular/testing';
 import { AppComponent } from './app.component';
 import { FileUploadComponent } from './file-upload/file-upload.component';
-import { AddEvent, CancelEvent, EditEvent, RemoveEvent } from '@progress/kendo-angular-grid';
+import {
+  AddEvent,
+  CancelEvent,
+  EditEvent,
+  RemoveEvent,
+} from '@progress/kendo-angular-grid';
 import { FormGroup } from '@angular/forms';
+import { NotificationsService } from './services/notifications.service';
+import { SocketService } from './services/socket.service';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
+  let notificationService: NotificationsService;
+  let socketService: SocketService;
   beforeEach(async () => {
+    const notificationSpy = jasmine.createSpyObj('NotificationsService', [
+      'showNotification',
+    ]);
     await TestBed.configureTestingModule({
       imports: [
         RouterModule.forRoot([]),
         ApolloTestingModule,
         HttpClientTestingModule,
       ],
+      providers: [{ provide: NotificationsService, useValue: notificationSpy }],
       declarations: [AppComponent, FileUploadComponent],
       teardown: { destroyAfterEach: false },
     }).compileComponents();
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
+    notificationService = TestBed.inject(
+      NotificationsService
+    ) as jasmine.SpyObj<NotificationsService>;
+    socketService = TestBed.inject(
+      SocketService
+    ) as jasmine.SpyObj<SocketService>;
     fixture.detectChanges();
   });
 
@@ -151,7 +170,7 @@ describe('AppComponent', () => {
         sender: mockGrid,
         formGroup: component.formGroup,
         dataItem: undefined,
-        isNew: false
+        isNew: false,
       };
 
       component.editedRowIndex = 1;
@@ -180,30 +199,75 @@ describe('AppComponent', () => {
   describe('removeHandler', () => {
     it('should set deletedId and open delete dialog', async () => {
       spyOn(component, 'open');
-      
+
       const mockEvent: RemoveEvent = {
         dataItem: { id: 123 },
         sender: {} as any,
         isNew: false,
-        rowIndex: 0
+        rowIndex: 0,
       };
-   
+
       await component.removeHandler(mockEvent);
-   
+
       expect(component.deletedId).toBe(123);
       expect(component.open).toHaveBeenCalled();
     });
-   });
-   describe('Dialog controls', () => {
+  });
+  describe('Dialog controls', () => {
     it('should open dialog', () => {
       component.open();
       expect(component.opened).toBeTrue();
     });
-   
+
     it('should close dialog', () => {
       component.opened = true;
       component.close();
       expect(component.opened).toBeFalse();
     });
-   });
+  });
+  describe('ngOnInit', () => {
+    let fileStatusCallback: (msg: any) => void;
+    let connectedCallback: (msg: any) => void;
+
+    beforeEach(() => {
+      spyOn(component, 'loadData');
+
+      spyOn(socketService, 'onFileUploadStatus').and.callFake(
+        (callback: (msg: any) => void) => {
+          fileStatusCallback = callback;
+        }
+      );
+
+      spyOn(socketService, 'onConnectedMessage').and.callFake(
+        (callback: (msg: any) => void) => {
+          connectedCallback = callback;
+        }
+      );
+
+      component.ngOnInit();
+    });
+
+    it('should initialize correctly', () => {
+      expect(component.loadData).toHaveBeenCalled();
+      expect(socketService.onConnectedMessage).toHaveBeenCalled();
+      expect(socketService.onFileUploadStatus).toHaveBeenCalled();
+    });
+    it('should handle successful file upload', () => {
+      fileStatusCallback({ status: 200 });
+
+      expect(notificationService.showNotification).toHaveBeenCalledWith(
+        'success',
+        'File uploaded successfully'
+      );
+      expect(component.loadData).toHaveBeenCalled();
+    });
+    it('should handle failed file upload', () => {
+      fileStatusCallback({ status: 400 });
+
+      expect(notificationService.showNotification).toHaveBeenCalledWith(
+        'error',
+        'File failed to uploaded'
+      );
+    });
+  });
 });

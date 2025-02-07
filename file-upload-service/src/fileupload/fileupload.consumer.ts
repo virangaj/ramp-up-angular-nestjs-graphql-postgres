@@ -24,7 +24,7 @@ export class FileUploadConsumer {
       this.logger.error(`Job ${job.id} failed: ${err.message}`);
     });
     this.client = new ApolloClient({
-      uri: 'http://localhost:3000/graphql',
+      uri: process.env.GRAPHQL_GATEWAY,
       cache: new InMemoryCache(),
     });
   }
@@ -64,6 +64,7 @@ export class FileUploadConsumer {
             address
             mobileNo
             dob
+            courseId
           }
         }
       `;
@@ -76,6 +77,7 @@ export class FileUploadConsumer {
           gender: student.gender,
           address: student.address,
           mobileNo: student.mobileNo,
+          courseId: student.courseId,
           dob: dob,
         };
       });
@@ -95,7 +97,7 @@ export class FileUploadConsumer {
       }
       return response.data.bulkCreateStudents;
     } catch (error) {
-      this.fileUploadGateway.sendNotification(400, 'File upload completed');
+      this.fileUploadGateway.sendNotification(400, 'File upload not completed');
       throw new Error(`Failed to execute mutation: ${error.message}`);
     }
   }

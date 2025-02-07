@@ -99,6 +99,7 @@
       <kendo-grid-column field="gender" title="Gender"> </kendo-grid-column>
       <kendo-grid-column field="address" title="Address"> </kendo-grid-column>
       <kendo-grid-column field="mobileNo" title="MobileNo"> </kendo-grid-column>
+      <kendo-grid-column field="courseId" title="Course Id"> </kendo-grid-column>
       <kendo-grid-column
         field="dob"
         title="Date of Birth"
@@ -123,6 +124,15 @@
         </ng-template>
       </kendo-grid-command-column>
     </kendo-grid>
+
+
+    <kendo-dialog title="Please confirm" *ngIf="opened" (close)="close()">
+      <p>Are you sure you want to continue?</p>
+      <kendo-dialog-actions>
+        <button kendoButton (click)="close()">No</button>
+        <button kendoButton (click)="deleteApprove()" themeColor="primary">Yes</button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
   </div>
 </main>
 <router-outlet />

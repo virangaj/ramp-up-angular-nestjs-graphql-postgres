@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
 import { CreateStudentInput } from './dto/create-student.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
@@ -11,6 +11,7 @@ import { Student } from './entities/student.entity';
 export class StudentService {
   constructor(
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    private dataSource: DataSource,
   ) {}
   private readonly logger = new Logger(StudentService.name, {
     timestamp: true,
@@ -19,39 +20,65 @@ export class StudentService {
   create(createStudentInput: CreateStudentInput): Promise<Student> {
     try {
       this.logger.log('Creating new student started.');
+      //  calculate age -> assume dob is not this year
+
+      let age =
+        new Date().getFullYear() -
+        new Date(createStudentInput.dob).getFullYear();
+      if (age < 0) {
+        throw new BadRequestException('Invalid birthday.');
+      }
       const student: Student =
         this.studentRepository.create(createStudentInput);
-      //  calculate age -> assume dob is not this year
-      let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
+
       student.age = age;
+
       student.createdAt = new Date();
       const createdStudent = this.studentRepository.save(student);
       this.logger.log('Student created successfully.');
       return createdStudent;
     } catch (error) {
       this.logger.error('Failed to create student: ' + error.message);
+      if (error instanceof BadRequestException) {
+        throw error.message;
+      }
       throw new Error('Unable to create student. Please try again later.');
     }
   }
   //  create multiple student records
-  bulkCreate(createStudentInput: CreateBulkStudentInput) {
+  async bulkCreate(createStudentInput: CreateBulkStudentInput) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       this.logger.log('BulkCreate new students started.');
-      const students: Student[] = createStudentInput.bulkCreateStudents.map(
-        (student: CreateStudentInput) => {
-          const singleStd = this.studentRepository.create(student);
-          let age =
-            new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
-          singleStd.age = age;
-          singleStd.createdAt = new Date();
-          return singleStd;
-        },
+      const students: Student[] = await Promise.all(
+        createStudentInput.bulkCreateStudents.map(
+          async (student: CreateStudentInput) => {
+            let age =
+              new Date().getFullYear() - new Date(student.dob).getFullYear();
+            if (age < 0) {
+              await queryRunner.rollbackTransaction();
+              throw new BadRequestException('Invalid birthday.');
+            }
+            const singleStd = this.studentRepository.create(student);
+
+            singleStd.age = age;
+            singleStd.createdAt = new Date();
+            return singleStd;
+          },
+        ),
       );
       const createdStudents = this.studentRepository.save(students);
+      await queryRunner.commitTransaction();
       this.logger.log('Students created successfully.');
       return createdStudents;
     } catch (error) {
       this.logger.error('Failed to create students: ' + error.message);
+      await queryRunner.rollbackTransaction();
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new Error('Unable to create students. Please try again later.');
     }
   }
@@ -74,15 +101,19 @@ export class StudentService {
       // Fetch the existing student
       const student = await this.studentRepository.findOne({ where: { id } });
       if (!student) {
-        throw new Error('Student not found');
+        throw new BadRequestException('Student not found');
+      }
+      const age =
+        new Date().getFullYear() -
+        new Date(updateStudentInput.dob).getFullYear();
+      if (age < 0) {
+        throw new BadRequestException('Invalid birthday.');
       }
       const updateStudent: Student = {
         ...student,
         ...updateStudentInput,
       };
-      const age =
-        new Date().getFullYear() -
-        new Date(updateStudentInput.dob).getFullYear();
+
       updateStudent.age = age;
       updateStudent.updatedAt = new Date();
       const updatedStudent = await this.studentRepository.save(updateStudent);
@@ -91,6 +122,9 @@ export class StudentService {
       return updatedStudent;
     } catch (error) {
       this.logger.error('Failed to update student : ' + error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new Error('Unable to update students. Please try again later.');
     }
   }
@@ -138,6 +172,19 @@ export class StudentService {
         'Failed to fetch paginated students : ' + error.message,
       );
 
+      return null;
+    }
+  }
+
+  async forCourse(id: number): Promise<Student[]> {
+    try {
+      this.logger.log('Fetching students for course :'+ id);
+      const students = await this.studentRepository.find({
+        where: { courseId: id },
+      });
+      return students;
+    } catch (error) {
+      this.logger.error('Failed to fetch students for course :'+ error.message);
       return null;
     }
   }

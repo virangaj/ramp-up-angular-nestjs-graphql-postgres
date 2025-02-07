@@ -22,6 +22,7 @@ describe('StudentFacade', () => {
       address: '123 Street, City',
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
+      courseId: 1,
       age: 24,
     },
     {
@@ -32,6 +33,7 @@ describe('StudentFacade', () => {
       address: '456 Avenue, City',
       mobileNo: '0987654321',
       dob: new Date('2002-05-15'),
+      courseId: 1,
       age: 22,
     },
   ];
@@ -80,16 +82,15 @@ describe('StudentFacade', () => {
     );
   });
   it('Should create new student', async () => {
-    const createStudent: CreateStudent[] = [
-      {
-        name: 'John Doe',
-        email: 'john@example.com',
-        gender: 'Male',
-        address: '123 Street, City',
-        mobileNo: '1234567890',
-        dob: new Date('2000-01-01'),
-      },
-    ];
+    const createStudent: CreateStudent = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      gender: 'Male',
+      address: '123 Street, City',
+      courseId: 1,
+      mobileNo: '1234567890',
+      dob: new Date('2000-01-01'),
+    };
     const mockResponse: Student = mockStudents[0];
     studentService.createNewStudent.and.returnValue(
       Promise.resolve(mockResponse)
@@ -100,16 +101,15 @@ describe('StudentFacade', () => {
     expect(studentService.createNewStudent).toHaveBeenCalledWith(createStudent);
   });
   it('Should update student', async () => {
-    const updateStudent: CreateStudent[] = [
-      {
-        name: 'John Doe',
-        email: 'john@example.com',
-        gender: 'Male',
-        address: '123 Street, City',
-        mobileNo: '1234567890',
-        dob: new Date('2000-01-01'),
-      },
-    ];
+    const updateStudent: CreateStudent = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      gender: 'Male',
+      address: '123 Street, City',
+      courseId: 1,
+      mobileNo: '1234567890',
+      dob: new Date('2000-01-01'),
+    };
     const mockResponse: Student = mockStudents[0];
     studentService.updateStudent.and.returnValue(Promise.resolve(mockResponse));
     const result = await facade.updateStudent(1, updateStudent);

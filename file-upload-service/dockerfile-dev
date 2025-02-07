@@ -1,0 +1,16 @@
+FROM node:20.9.0 AS file-upload-base
+
+WORKDIR /usr/src/app
+
+RUN npm -v
+RUN npm i -g npm@10.1.0
+
+RUN npm -v
+
+COPY package.json ./
+
+RUN npm i --force
+
+RUN npm i -g rimraf
+
+RUN rm -f package.json

@@ -10,4 +10,5 @@ export interface StudentInput {
   address: string;
   mobileNo: string;
   dob: Date;
+  courseId: number;
 }

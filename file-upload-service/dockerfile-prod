@@ -1,0 +1,24 @@
+FROM node:20.9.0-alpine AS file-upload-prod
+
+ARG REDIS_HOST=cache
+ARG REDIS_PORT=6379
+ARG REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+
+ENV REDIS_HOST=${REDIS_HOST}
+ENV REDIS_PORT=${REDIS_PORT}
+ENV REDIS_PASSWORD=${REDIS_PASSWORD}
+
+
+WORKDIR /usr/src/app
+
+
+RUN npm -v
+RUN npm install -g npm@10.1.0
+
+
+COPY package.json ./
+
+
+RUN npm install --force --only=production
+RUN rm -f package.json
+

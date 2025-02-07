@@ -6,12 +6,16 @@ import { join } from 'path';
 import { Client } from 'pg';
 import { DateTimeScalar } from './graphql/scalars/date-time.scalar';
 import { StudentModule } from './student/student.module';
+import { Course } from './student/entities/course.entity';
 @Module({
   imports: [
     StudentModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloFederationDriver,
       autoSchemaFile: join(process.cwd(), 'src/graphsql-schema.gql'),
+      playground: true,
+      introspection: true,
+      buildSchemaOptions: { orphanedTypes: [Course] },
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
@@ -21,6 +25,10 @@ import { StudentModule } from './student/student.module';
           port: parseInt(process.env.DATABASE_PORT, 10),
           user: process.env.DATABASE_USERNAME,
           password: process.env.DATABASE_PASSWORD,
+          autoLoadEntities: true,
+          synchronize: true,
+          retryAttempts: 5,
+          retryDelay: 5000,
         });
 
         await client.connect();

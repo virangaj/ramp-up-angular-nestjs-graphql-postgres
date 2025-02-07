@@ -32,6 +32,7 @@ describe('GraphqlService', () => {
         address: '123 Street, City',
         mobileNo: '1234567890',
         dob: new Date('2000-01-01'),
+        courseId: 1,
         age: 24,
       },
       {
@@ -42,6 +43,7 @@ describe('GraphqlService', () => {
         address: '456 Avenue, City',
         mobileNo: '0987654321',
         dob: new Date('2002-05-15'),
+        courseId: 1,
         age: 22,
       },
     ];
@@ -69,6 +71,7 @@ describe('GraphqlService', () => {
       address: '123 Street, City',
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
+      courseId: 1,
       age: 24,
     };
     const mockCreateStudent: CreateStudent[] = [
@@ -78,6 +81,7 @@ describe('GraphqlService', () => {
         gender: 'Male',
         address: '123 Street, City',
         mobileNo: '1234567890',
+        courseId: 1,
         dob: new Date('2000-01-01'),
       },
     ];

@@ -1,5 +1,6 @@
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Course } from './course.entity';
 
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -44,4 +45,11 @@ export class Student {
   @Column({ type: 'timestamptz', nullable: true })
   @Field(() => Date, { nullable: true })
   updatedAt?: Date;
+
+  @Field(()=> Course)
+  course: Course;
+
+  @Column()
+  @Field()
+  courseId: number;
 }

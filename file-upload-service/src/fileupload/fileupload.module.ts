@@ -12,6 +12,7 @@ import { FileUploadGateway } from './fileupload.gateway';
       redis: {
         host: process.env.REDIS_HOST,
         port: 6379,
+        // password: process.env.REDIS_PASSWORD
       },
     }),
     BullModule.registerQueue({

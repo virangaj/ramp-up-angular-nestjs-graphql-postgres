@@ -1,6 +1,6 @@
-FROM node:20.9.0 as BASE
+FROM node:20.9.0 AS student-base
 
-WORKDIR usr/src/app
+WORKDIR /usr/src/app
 
 RUN npm -v
 RUN npm i -g npm@10.1.0

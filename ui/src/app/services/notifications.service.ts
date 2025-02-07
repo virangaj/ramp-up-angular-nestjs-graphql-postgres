@@ -26,7 +26,9 @@ export class NotificationsService {
         this.notificationState.type = { style: 'success', icon: true };
         break;
       case 'error':
-        this.notificationState.content = 'Oops, something went wrong...';
+        this.notificationState.content = message
+          ? message
+          : 'Oops, something went wrong...';
         this.notificationState.type = { style: 'error', icon: true };
         break;
     }

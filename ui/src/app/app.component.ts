@@ -34,7 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationsService,
     private socketService: SocketService,
-    private studentFacade: StudentFacade
+    public studentFacade: StudentFacade
   ) {}
 
   public title = 'Student Management';

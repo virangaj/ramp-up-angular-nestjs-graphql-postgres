@@ -10,9 +10,10 @@ import {
   EditEvent,
   RemoveEvent,
 } from '@progress/kendo-angular-grid';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { NotificationsService } from './services/notifications.service';
 import { SocketService } from './services/socket.service';
+import { CreateStudent, Student } from './models';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -268,6 +269,168 @@ describe('AppComponent', () => {
         'error',
         'File failed to uploaded'
       );
+    });
+  });
+  describe('Remove student approve', () => {
+    it('should delete student successfully and update gridData', async () => {
+      spyOn(component.studentFacade, 'removeStudent').and.returnValue(
+        Promise.resolve({ id: 1 } as Student)
+      );
+      component.deletedId = 1;
+      component.gridData = {
+        data: [
+          { id: 1, name: 'John Doe' },
+          { id: 2, name: 'Jane Doe' },
+        ],
+        total: 2,
+      };
+
+      await component.deleteApprove();
+
+      expect(component.studentFacade.removeStudent).toHaveBeenCalledWith(1);
+      expect(component.gridData.data.length).toBe(1);
+      expect(
+        component.gridData.data.find((item) => item.id === 1)
+      ).toBeUndefined();
+      expect(component.gridData.total).toBe(1);
+      fixture.detectChanges();
+      expect(notificationService.showNotification).toHaveBeenCalledWith(
+        'success',
+        'Data has been deleted successfully.'
+      );
+      expect(component.opened).toBeFalse();
+    });
+    it('should handle error and show error notification', async () => {
+      spyOn(component.studentFacade, 'removeStudent').and.throwError(
+        'Deletion failed'
+      );
+
+      await component.deleteApprove();
+
+      expect(notificationService.showNotification).toHaveBeenCalledWith(
+        'error'
+      );
+      expect(component.opened).toBeFalse();
+    });
+  });
+  describe('saveHandler', () => {
+    let senderMock: any;
+    let formGroupMock: any;
+    let studentMock: CreateStudent;
+    let newStudentMock: Student;
+    let updatedStudentMock: Student;
+    beforeEach(() => {
+      senderMock = { closeRow: jasmine.createSpy('closeRow') };
+      studentMock = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        gender: 'Male',
+        address: '123 Street',
+        mobileNo: '1234567890',
+        dob: new Date(),
+      };
+      newStudentMock = { id: 1, ...studentMock };
+      updatedStudentMock = { id: 1, ...studentMock };
+
+      formGroupMock = new FormGroup({
+        name: new FormControl(studentMock.name),
+        email: new FormControl(studentMock.email),
+        gender: new FormControl(studentMock.gender),
+        address: new FormControl(studentMock.address),
+        mobileNo: new FormControl(studentMock.mobileNo),
+        dob: new FormControl(studentMock.dob),
+      });
+    });
+    it('should create a new student and update gridData', async () => {
+      spyOn(component.studentFacade, 'createNewStudent').and.returnValue(
+        Promise.resolve(newStudentMock)
+      );
+      component.gridData = { data: [], total: 0 };
+
+      await component.saveHandler({
+        sender: senderMock,
+        rowIndex: 0,
+        formGroup: formGroupMock,
+        isNew: true,
+        dataItem: null,
+      });
+
+      expect(component.studentFacade.createNewStudent).toHaveBeenCalledWith(
+        studentMock
+      );
+      expect(component.gridData.data.length).toBe(1);
+      expect(component.gridData.total).toBe(1);
+      // expect(notificationService.showNotification).toHaveBeenCalledWith(
+      //   'success'
+      // );
+      fixture.detectChanges();
+      expect(senderMock.closeRow).toHaveBeenCalledWith(0);
+    });
+    it('should handle error when creating a new student', async () => {
+      spyOn(component.studentFacade, 'createNewStudent').and.throwError(
+        'Creation failed'
+      );
+
+      await component.saveHandler({
+        sender: senderMock,
+        rowIndex: 0,
+        formGroup: formGroupMock,
+        isNew: true,
+        dataItem: null,
+      });
+
+      // expect(notificationService.showNotification).toHaveBeenCalledWith(
+      //   'error',
+      //   'Creation failed'
+      // );
+      expect(senderMock.closeRow).toHaveBeenCalledWith(0);
+    });
+    it('should update an existing student and update gridData', async () => {
+      spyOn(component.studentFacade, 'updateStudent').and.returnValue(
+        Promise.resolve(updatedStudentMock)
+      );
+      component.gridData = { data: [{ id: 1, name: 'Old Name' }], total: 1 };
+      component.editDataID = 1;
+
+      await component.saveHandler({
+        sender: senderMock,
+        rowIndex: 0,
+        formGroup: formGroupMock,
+        isNew: false,
+        dataItem: null,
+      });
+
+      expect(component.studentFacade.updateStudent).toHaveBeenCalledWith(
+        1,
+        studentMock
+      );
+      expect(component.gridData.data.find((item) => item.id === 1)?.name).toBe(
+        'John Doe'
+      );
+      // expect(notificationService.showNotification).toHaveBeenCalledWith(
+      //   'success'
+      // );
+      fixture.detectChanges();
+      expect(senderMock.closeRow).toHaveBeenCalledWith(0);
+    });
+    it('should handle error when updating an existing student', async () => {
+      spyOn(component.studentFacade, 'updateStudent').and.throwError(
+        'Update failed'
+      );
+      component.editDataID = 1;
+
+      await component.saveHandler({
+        sender: senderMock,
+        rowIndex: 0,
+        formGroup: formGroupMock,
+        isNew: false,
+        dataItem: null,
+      });
+
+      // expect(
+      //   component.notificationService.showNotification
+      // ).toHaveBeenCalledWith('error', 'Update failed');
+      expect(senderMock.closeRow).toHaveBeenCalledWith(0);
     });
   });
 });

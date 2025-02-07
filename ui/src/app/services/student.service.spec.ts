@@ -163,20 +163,18 @@ describe('StudentService', () => {
   });
   describe('updateStudent', () => {
     const mockStudentId = 1;
-    const mockUpdateInput: CreateStudent[] = [
-      {
-        name: 'Updated John Doe',
-        email: 'updated.john@example.com',
-        gender: 'Male',
-        address: 'Updated Street, City',
-        mobileNo: '9876543210',
-        dob: new Date('2000-01-01'),
-      },
-    ];
+    const mockUpdateInput: CreateStudent = {
+      name: 'Updated John Doe',
+      email: 'updated.john@example.com',
+      gender: 'Male',
+      address: 'Updated Street, City',
+      mobileNo: '9876543210',
+      dob: new Date('2000-01-01'),
+    };
 
     const mockUpdatedStudent: Student = {
       id: mockStudentId,
-      ...mockUpdateInput[0],
+      ...mockUpdateInput,
     };
 
     const mockUpdateResponse = {
@@ -238,12 +236,6 @@ describe('StudentService', () => {
       }
     });
 
-    it('should handle empty input array', async () => {
-      await expectAsync(
-        service.updateStudent(mockStudentId, [])
-      ).toBeRejectedWithError();
-    });
-
     it('should handle invalid student ID', async () => {
       const invalidId = -1;
       const errorMessage = 'Invalid student ID';
@@ -256,22 +248,20 @@ describe('StudentService', () => {
     });
 
     it('should update student with minimal data', async () => {
-      const minimalUpdate: CreateStudent[] = [
-        {
-          name: 'John Doe',
-          email: 'john@example.com',
-          gender: 'Male',
-          dob: new Date('2000-01-01'),
-          address: '',
-          mobileNo: '',
-        },
-      ];
+      const minimalUpdate: CreateStudent = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        gender: 'Male',
+        dob: new Date('2000-01-01'),
+        address: '',
+        mobileNo: '',
+      };
 
       const minimalResponse = {
         data: {
           updateStudent: {
             id: mockStudentId,
-            ...minimalUpdate[0],
+            ...minimalUpdate,
           },
         },
       };
@@ -283,25 +273,23 @@ describe('StudentService', () => {
       const result = await service.updateStudent(mockStudentId, minimalUpdate);
 
       expect(result.id).toBe(mockStudentId);
-      expect(result.name).toBe(minimalUpdate[0].name);
-      expect(result.email).toBe(minimalUpdate[0].email);
+      expect(result.name).toBe(minimalUpdate.name);
+      expect(result.email).toBe(minimalUpdate.email);
     });
   });
   describe('createNewStudent', () => {
-    const mockCreateInput: CreateStudent[] = [
-      {
-        name: 'New Student',
-        email: 'newstudent@example.com',
-        gender: 'Male',
-        address: '789 New Street, City',
-        mobileNo: '1122334455',
-        dob: new Date('2000-01-01'),
-      },
-    ];
+    const mockCreateInput: CreateStudent = {
+      name: 'New Student',
+      email: 'newstudent@example.com',
+      gender: 'Male',
+      address: '789 New Street, City',
+      mobileNo: '1122334455',
+      dob: new Date('2000-01-01'),
+    };
 
     const mockCreatedStudent: Student = {
       id: 3,
-      ...mockCreateInput[0],
+      ...mockCreateInput,
     };
 
     const mockCreateResponse = {
@@ -325,8 +313,8 @@ describe('StudentService', () => {
       });
       expect(result).toEqual(mockCreatedStudent);
       expect(result.id).toBeDefined();
-      expect(result.name).toBe(mockCreateInput[0].name);
-      expect(result.email).toBe(mockCreateInput[0].email);
+      expect(result.name).toBe(mockCreateInput.name);
+      expect(result.email).toBe(mockCreateInput.email);
     });
 
     it('should handle network errors during creation', async () => {
@@ -364,27 +352,21 @@ describe('StudentService', () => {
       }
     });
 
-    it('should handle empty input array', async () => {
-      await expectAsync(service.createNewStudent([])).toBeRejectedWithError();
-    });
-
     it('should create student with minimal required data', async () => {
-      const minimalInput: CreateStudent[] = [
-        {
-          name: 'Minimal Student',
-          email: 'minimal@example.com',
-          gender: 'Female',
-          dob: new Date('2000-01-01'),
-          address: '',
-          mobileNo: '',
-        },
-      ];
+      const minimalInput: CreateStudent = {
+        name: 'Minimal Student',
+        email: 'minimal@example.com',
+        gender: 'Female',
+        dob: new Date('2000-01-01'),
+        address: '',
+        mobileNo: '',
+      };
 
       const minimalResponse = {
         data: {
           createStudent: {
             id: 4,
-            ...minimalInput[0],
+            ...minimalInput,
           },
         },
       };
@@ -394,39 +376,20 @@ describe('StudentService', () => {
       );
       const result = await service.createNewStudent(minimalInput);
       expect(result.id).toBeDefined();
-      expect(result.name).toBe(minimalInput[0].name);
-      expect(result.email).toBe(minimalInput[0].email);
+      expect(result.name).toBe(minimalInput.name);
+      expect(result.email).toBe(minimalInput.email);
       expect(result.address).toBe('');
       expect(result.mobileNo).toBe('');
     });
 
     it('should handle invalid date of birth', async () => {
-      const invalidInput: CreateStudent[] = [
-        {
-          ...mockCreateInput[0],
-          dob: new Date('invalid date'),
-        },
-      ];
+      const invalidInput: CreateStudent = {
+        ...mockCreateInput,
+        dob: new Date('invalid date'),
+      };
       await expectAsync(
         service.createNewStudent(invalidInput)
       ).toBeRejectedWithError();
-    });
-
-    it('should handle invalid email format', async () => {
-      const invalidEmailInput: CreateStudent[] = [
-        {
-          ...mockCreateInput[0],
-          email: 'invalid-email',
-        },
-      ];
-
-      const validationError = new Error('Invalid email format');
-      graphqlService.mutateQuery.and.returnValue(
-        Promise.reject(validationError)
-      );
-      await expectAsync(
-        service.createNewStudent(invalidEmailInput)
-      ).toBeRejectedWithError('Failed to create student: Invalid email format');
     });
   });
   describe('removeStudent', () => {

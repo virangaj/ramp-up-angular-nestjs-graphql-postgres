@@ -1,0 +1,75 @@
+services:
+  postgres_db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=123456
+    container_name: postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+
+  student-service:
+    build:
+      context: ./student-graphql-service
+      dockerfile: dockerfile
+    container_name: student-service
+    environment:
+      PORT: 3001
+      DATABASE_HOST: postgres_db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: 123456
+      DATABASE_NAME: rampup_students
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    working_dir: /usr/src/app
+    volumes:
+      - ./src:/app/src
+  student-dashboard:
+    build:
+      context: ./ui
+      dockerfile: dockerfile
+    container_name: student-dashboard
+    ports:
+      - "4200:4200"
+    working_dir: /usr/src/app
+    volumes:
+      - ./src:/app/src
+  file-upload-service:
+    build:
+      context: ./file-upload-service
+      dockerfile: dockerfile
+    container_name: file-upload-service
+    environment:
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+    ports:
+      - "3002:3002"
+    depends_on:
+      - cache
+    working_dir: /usr/src/app
+    volumes:
+      - ./src:/app/src
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local

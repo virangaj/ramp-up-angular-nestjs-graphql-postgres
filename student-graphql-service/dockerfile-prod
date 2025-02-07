@@ -1,8 +1,8 @@
-FROM node:20.9.0-alpine as prod
+FROM node:20.9.0-alpine AS student-prod
 
 # Set environment variables
 ARG NODE_ENV=production
-ARG DATABASE_HOST=localhost
+ARG DATABASE_HOST=database
 ARG DATABASE_PORT=5432
 ARG DATABASE_USERNAME=postgres
 ARG DATABASE_PASSWORD=123456

@@ -1,0 +1,11 @@
+FROM node:20.9.0 AS dashboard-base
+
+WORKDIR /usr/src/app
+
+RUN npm i -g npm@10.1.0 && npm -v
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+RUN npm i -g rimraf

@@ -1,4 +1,4 @@
-FROM node:20.9.0 AS student-base
+FROM node:20.9.0 AS file-upload-base
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,7 @@ RUN npm -v
 
 COPY package.json ./
 
-RUN npm i
+RUN npm i --force
 
 RUN npm i -g rimraf
 

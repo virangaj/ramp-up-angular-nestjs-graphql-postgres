@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ApolloTestingModule } from 'apollo-angular/testing';
 import { AppComponent } from './app.component';
 import { FileUploadComponent } from './file-upload/file-upload.component';
-import { AddEvent, CancelEvent, EditEvent } from '@progress/kendo-angular-grid';
+import { AddEvent, CancelEvent, EditEvent, RemoveEvent } from '@progress/kendo-angular-grid';
 import { FormGroup } from '@angular/forms';
 
 describe('AppComponent', () => {
@@ -177,5 +177,33 @@ describe('AppComponent', () => {
       expect(component.formGroup).toBeNull();
     });
   });
-  
+  describe('removeHandler', () => {
+    it('should set deletedId and open delete dialog', async () => {
+      spyOn(component, 'open');
+      
+      const mockEvent: RemoveEvent = {
+        dataItem: { id: 123 },
+        sender: {} as any,
+        isNew: false,
+        rowIndex: 0
+      };
+   
+      await component.removeHandler(mockEvent);
+   
+      expect(component.deletedId).toBe(123);
+      expect(component.open).toHaveBeenCalled();
+    });
+   });
+   describe('Dialog controls', () => {
+    it('should open dialog', () => {
+      component.open();
+      expect(component.opened).toBeTrue();
+    });
+   
+    it('should close dialog', () => {
+      component.opened = true;
+      component.close();
+      expect(component.opened).toBeFalse();
+    });
+   });
 });

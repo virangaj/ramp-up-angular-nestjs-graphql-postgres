@@ -43,6 +43,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        courseId: 1,
       };
 
       const createdStudent: Student = {
@@ -70,6 +71,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996@ew'),
+        courseId: 1,
       };
       jest
         .spyOn(studentService, 'create')
@@ -92,6 +94,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
+          courseId: 1,
         },
         {
           name: 'kamala',
@@ -100,6 +103,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
+          courseId: 1,
         },
       ];
       const studentInput: CreateBulkStudentInput = {
@@ -142,6 +146,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Dehiwala',
           mobileNo: '0715586362',
           dob: new Date('1996@wewe'),
+          courseId: 1,
         },
         {
           name: 'kamala',
@@ -150,6 +155,7 @@ describe('StudentResolver', () => {
           address: 'No. 53, Galle Road, Pettah',
           mobileNo: '0785693258',
           dob: new Date('1999@wewe'),
+          courseId: 1,
         },
       ];
       const studentInput: CreateBulkStudentInput = {
@@ -175,6 +181,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
+        courseId: 1,
       };
 
       const createdStudent: Student = {
@@ -201,6 +208,7 @@ describe('StudentResolver', () => {
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
         dob: new Date('1996@ew'),
+        courseId: 1,
       };
       jest
         .spyOn(studentService, 'update')

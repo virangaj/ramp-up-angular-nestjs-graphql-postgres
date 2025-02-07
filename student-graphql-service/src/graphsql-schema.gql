@@ -80,6 +80,7 @@ input CreateStudentInput {
   address: String!
   mobileNo: String!
   dob: DateTime!
+  courseId: Float!
 }
 
 input CreateBulkStudentInput {

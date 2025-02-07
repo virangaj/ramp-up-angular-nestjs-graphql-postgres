@@ -7,6 +7,7 @@ export class CreateStudent {
   address: string;
   mobileNo: string;
   dob: Date;
+  courseId: number;
 }
 export class Student {
   id?: number;
@@ -17,6 +18,7 @@ export class Student {
   mobileNo: string;
   dob: Date;
   age?: number;
+  courseId: number;
 }
 export interface State {
   sort: SortDescriptor[];

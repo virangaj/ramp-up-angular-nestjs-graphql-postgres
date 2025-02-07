@@ -1,30 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentService } from './student.service';
-import { CreateStudentInput } from './dto/create-student.input';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Student } from './entities/student.entity';
-import { Repository } from 'typeorm';
-import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
+import { DataSource, Repository } from 'typeorm';
+import { CreateStudentInput } from './dto/create-student.input';
 import { FetchPaginatedStudentsInput } from './dto/fetch-paginated-students-input';
 import { FetchPaginatedStudentsOutput } from './dto/fetch-paginated-students-output';
-import { Logger } from '@nestjs/common';
+import { Student } from './entities/student.entity';
+import { StudentService } from './student.service';
+import { BadRequestException } from '@nestjs/common';
 
 describe('StudentService', () => {
   let service: StudentService;
   let studentRepository: Repository<Student>;
+  let dataSource: DataSource;
   const studentInput: CreateStudentInput = {
     name: 'saman',
     email: 'saman@gmail.com',
     gender: 'male',
     address: 'No. 53, Galle Road, Dehiwala',
     mobileNo: '0715586362',
+    courseId: 1,
     dob: new Date('1996-02-25'),
   };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StudentService,
-        Logger,
+        {
+          provide: DataSource,
+          useValue: {
+            createConnection: jest.fn(),
+          },
+        },
         {
           provide: getRepositoryToken(Student),
           useValue: {
@@ -52,6 +58,8 @@ describe('StudentService', () => {
         age: 0,
         createdAt: undefined,
         updatedAt: undefined,
+        courseId: 1,
+        course: undefined,
         ...studentInput,
       };
 
@@ -67,12 +75,30 @@ describe('StudentService', () => {
       expect(studentRepository.save).toHaveBeenCalledWith(createdStudent);
       expect(result).toEqual(createdStudent);
     });
+    it('Should throw error when invalid birthdate', async () => {
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+      const studentData: CreateStudentInput = {
+        name: 'saman',
+        email: 'saman@gmail.com',
+        gender: 'male',
+        address: 'No. 53, Galle Road, Dehiwala',
+        mobileNo: '0715586362',
+        courseId: 1,
+        dob: futureDate,
+      };
+      await expect(service.create(studentData)).rejects.toThrow(
+        'Invalid birthday.',
+      );
+    });
     it('should throw an error when student creation fails', async () => {
       jest.spyOn(studentRepository, 'create').mockReturnValue({
         ...studentInput,
         age: 29,
         id: 1,
         createdAt: undefined,
+        courseId: 1,
+        course: undefined,
       });
       jest
         .spyOn(studentRepository, 'save')
@@ -96,14 +122,17 @@ describe('StudentService', () => {
         gender: 'male',
         address: 'No. 53, Galle Road, Dehiwala',
         mobileNo: '0715586362',
-        dob: new Date('1996@we'),
+        dob: new Date('1996/02/15'),
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
       const updateStudentInput: CreateStudentInput = {
         name: 'saman',
         email: 'saman@gmail.com',
         gender: 'male',
         address: 'No. 53, Galle Road, Dehiwala',
+        courseId: 1,
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
       };
@@ -142,6 +171,8 @@ describe('StudentService', () => {
         dob: new Date('1996-02-25'),
         age: 28,
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
 
       jest.spyOn(studentRepository, 'findOne').mockResolvedValue(student);
@@ -171,6 +202,8 @@ describe('StudentService', () => {
           mobileNo: '0715586362',
           dob: new Date('1996-02-25'),
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
         },
         {
           id: 2,
@@ -182,6 +215,8 @@ describe('StudentService', () => {
           mobileNo: '0785693258',
           dob: new Date('1999-02-25'),
           createdAt: new Date(),
+          courseId: 1,
+          course: undefined,
         },
       ];
 
@@ -205,6 +240,8 @@ describe('StudentService', () => {
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
       jest.spyOn(studentRepository, 'findOne').mockResolvedValue(studentData);
       const result = await service.findOne(1);
@@ -233,6 +270,8 @@ describe('StudentService', () => {
         mobileNo: '0715586362',
         dob: new Date('1996-02-25'),
         createdAt: new Date(),
+        courseId: 1,
+        course: undefined,
       };
       const expectedOutput: FetchPaginatedStudentsOutput = {
         current: 1,

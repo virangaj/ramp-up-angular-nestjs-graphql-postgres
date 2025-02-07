@@ -64,6 +64,7 @@ export class FileUploadConsumer {
             address
             mobileNo
             dob
+            courseId
           }
         }
       `;
@@ -76,6 +77,7 @@ export class FileUploadConsumer {
           gender: student.gender,
           address: student.address,
           mobileNo: student.mobileNo,
+          courseId: student.courseId,
           dob: dob,
         };
       });

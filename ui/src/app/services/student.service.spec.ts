@@ -23,6 +23,7 @@ describe('StudentService', () => {
       address: '123 Street, City',
       mobileNo: '1234567890',
       dob: new Date('2000-01-01'),
+      courseId: 1,
       age: 24,
     },
     {
@@ -33,6 +34,7 @@ describe('StudentService', () => {
       address: '456 Avenue, City',
       mobileNo: '0987654321',
       dob: new Date('2002-05-15'),
+      courseId: 1,
       age: 22,
     },
   ];
@@ -168,6 +170,7 @@ describe('StudentService', () => {
       email: 'updated.john@example.com',
       gender: 'Male',
       address: 'Updated Street, City',
+      courseId: 1,
       mobileNo: '9876543210',
       dob: new Date('2000-01-01'),
     };
@@ -253,6 +256,7 @@ describe('StudentService', () => {
         email: 'john@example.com',
         gender: 'Male',
         dob: new Date('2000-01-01'),
+        courseId: 1,
         address: '',
         mobileNo: '',
       };
@@ -283,6 +287,7 @@ describe('StudentService', () => {
       email: 'newstudent@example.com',
       gender: 'Male',
       address: '789 New Street, City',
+      courseId: 1,
       mobileNo: '1122334455',
       dob: new Date('2000-01-01'),
     };
@@ -359,6 +364,7 @@ describe('StudentService', () => {
         gender: 'Female',
         dob: new Date('2000-01-01'),
         address: '',
+        courseId: 1,
         mobileNo: '',
       };
 
@@ -395,6 +401,7 @@ describe('StudentService', () => {
   describe('removeStudent', () => {
     const mockStudentId = 1;
     const mockDeletedStudent: Student = {
+      courseId: 1,
       id: mockStudentId,
       name: 'John Doe',
       email: 'john@example.com',

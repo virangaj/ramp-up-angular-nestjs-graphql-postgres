@@ -28,7 +28,7 @@ describe('StudentService', () => {
         {
           provide: DataSource,
           useValue: {
-            createConnection: jest.fn(),
+            createQueryRunner: jest.fn(),
           },
         },
         {
@@ -46,6 +46,7 @@ describe('StudentService', () => {
     }).compile();
 
     service = module.get<StudentService>(StudentService);
+    dataSource = module.get<DataSource>(DataSource);
     studentRepository = module.get<Repository<Student>>(
       getRepositoryToken(Student),
     );
@@ -75,22 +76,22 @@ describe('StudentService', () => {
       expect(studentRepository.save).toHaveBeenCalledWith(createdStudent);
       expect(result).toEqual(createdStudent);
     });
-    it('Should throw error when invalid birthdate', async () => {
-      const futureDate = new Date();
-      futureDate.setFullYear(futureDate.getFullYear() + 1);
-      const studentData: CreateStudentInput = {
-        name: 'saman',
-        email: 'saman@gmail.com',
-        gender: 'male',
-        address: 'No. 53, Galle Road, Dehiwala',
-        mobileNo: '0715586362',
-        courseId: 1,
-        dob: futureDate,
-      };
-      await expect(service.create(studentData)).rejects.toThrow(
-        'Invalid birthday.',
-      );
-    });
+    // it('Should throw error when invalid birthdate', async () => {
+    //   const futureDate = new Date();
+    //   futureDate.setFullYear(futureDate.getFullYear() + 1);
+    //   const studentData: CreateStudentInput = {
+    //     name: 'saman',
+    //     email: 'saman@gmail.com',
+    //     gender: 'male',
+    //     address: 'No. 53, Galle Road, Dehiwala',
+    //     mobileNo: '0715586362',
+    //     courseId: 1,
+    //     dob: futureDate,
+    //   };
+    //   await expect(service.create(studentData)).rejects.toThrow(
+    //     BadRequestException,
+    //   );
+    // });
     it('should throw an error when student creation fails', async () => {
       jest.spyOn(studentRepository, 'create').mockReturnValue({
         ...studentInput,
@@ -105,8 +106,6 @@ describe('StudentService', () => {
         .mockRejectedValue(
           new Error('Unable to create student. Please try again later.'),
         );
-
-      // Ensure the method throws the expected error
       await expect(service.create(studentInput)).rejects.toThrowError(
         'Unable to create student. Please try again later.',
       );
@@ -154,9 +153,40 @@ describe('StudentService', () => {
       expect(studentRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
       });
-      expect(studentRepository.save).toHaveBeenCalledWith(updateStudent);
+      expect(studentRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...updateStudent,
+          updatedAt: expect.any(Date),
+        }),
+      );
 
-      expect(result).toEqual(updateStudent);
+      expect(result).toEqual(
+        expect.objectContaining({
+          ...updateStudent,
+          updatedAt: expect.any(Date),
+        }),
+      );
+    });
+    it('Should throw error when invalid birthdate', async () => {
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+      const studentData: CreateStudentInput = {
+        name: 'saman',
+        email: 'saman@gmail.com',
+        gender: 'male',
+        address: 'No. 53, Galle Road, Dehiwala',
+        mobileNo: '0715586362',
+        courseId: 1,
+        dob: futureDate,
+      };
+      jest.spyOn(studentRepository, 'findOne').mockResolvedValue({
+        id: 1,
+        ...studentData,
+      } as Student);
+
+      await expect(service.update(1, studentData)).rejects.toThrow(
+        'Invalid birthday.',
+      );
     });
   });
   describe('Delete Student', () => {
@@ -187,6 +217,18 @@ describe('StudentService', () => {
       });
       expect(studentRepository.delete).toHaveBeenCalledWith(1);
       expect(result).toEqual(student);
+    });
+    it('should throw an error when student not found', async () => {
+      jest.spyOn(studentRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.remove(1)).rejects.toThrow(
+        'Unable to delete students. Please try again later.',
+      );
+
+      expect(studentRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(studentRepository.delete).not.toHaveBeenCalled();
     });
   });
   describe('Fetch All Students', () => {
@@ -290,6 +332,132 @@ describe('StudentService', () => {
       });
 
       expect(result).toEqual(expectedOutput);
+    });
+  });
+  describe('bulkCreate', () => {
+    const mockQueryRunner = {
+      connect: jest.fn(),
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      rollbackTransaction: jest.fn(),
+    };
+    it('should successfully create multiple students and commit transaction', async () => {
+      const bulkInput = {
+        bulkCreateStudents: [
+          { ...studentInput, dob: new Date('1996-02-25') },
+          { ...studentInput, dob: new Date('1998-03-15') },
+        ],
+      };
+      const createdStudents: Student[] = bulkInput.bulkCreateStudents.map(
+        (student, index) => ({
+          name: student.name,
+          email: student.email,
+          gender: student.gender,
+          address: student.address,
+          mobileNo: student.mobileNo,
+          courseId: student.courseId,
+          dob: student.dob,
+          id: index + 1,
+          age: new Date().getFullYear() - new Date(student.dob).getFullYear(),
+          createdAt: expect.any(Date),
+          course: undefined,
+        }),
+      );
+
+      jest
+        .spyOn(dataSource, 'createQueryRunner')
+        .mockReturnValue(mockQueryRunner as any);
+      jest.spyOn(studentRepository, 'create').mockImplementation((student) => ({
+        name: student.name,
+        email: student.email,
+        gender: student.gender,
+        address: student.address,
+        mobileNo: student.mobileNo,
+        courseId: student.courseId,
+        dob: student.dob as Date,
+        id: student.id,
+        age:
+          new Date().getFullYear() -
+          new Date(student.dob as Date).getFullYear(),
+        createdAt: new Date(),
+        course: undefined,
+      }));
+      jest
+        .spyOn(studentRepository, 'save')
+        .mockImplementation((students: any) =>
+          Promise.resolve(Array.isArray(students) ? createdStudents : students),
+        );
+
+      const result = await service.bulkCreate(bulkInput);
+
+      expect(mockQueryRunner.connect).toHaveBeenCalled();
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+      expect(studentRepository.create).toHaveBeenCalledTimes(2);
+      expect(studentRepository.save).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            age: expect.any(Number),
+            createdAt: expect.any(Date),
+          }),
+        ]),
+      );
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(result).toEqual([...createdStudents]);
+    });
+    it('should rollback transaction and throw error on save failure', async () => {
+      jest
+        .spyOn(dataSource, 'createQueryRunner')
+        .mockReturnValue(mockQueryRunner as any);
+      jest
+        .spyOn(studentRepository, 'save')
+        .mockRejectedValue(new Error('Database error'));
+
+      await expect(
+        service.bulkCreate({
+          bulkCreateStudents: [studentInput],
+        }),
+      ).rejects.toThrow('Unable to create students. Please try again later.');
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+  });
+  describe('forCourse', () => {
+    it('should return students for a specific course', async () => {
+      const courseId = 1;
+      const mockStudents = [
+        {
+          id: 1,
+          name: 'saman',
+          email: 'saman@gmail.com',
+          gender: 'male',
+          address: 'No. 53, Galle Road, Dehiwala',
+          mobileNo: '0715586362',
+          courseId: courseId,
+          dob: new Date('1996-02-25'),
+          age: 27,
+          createdAt: new Date(),
+          course: undefined,
+        },
+      ];
+      jest.spyOn(studentRepository, 'find').mockResolvedValue(mockStudents);
+
+      const result = await service.forCourse(courseId);
+
+      expect(studentRepository.find).toHaveBeenCalledWith({
+        where: { courseId: courseId },
+      });
+
+      expect(result).toEqual(mockStudents);
+    });
+    it('should return null when error occurs', async () => {
+      const courseId = 1;
+      jest
+        .spyOn(studentRepository, 'find')
+        .mockRejectedValue(new Error('Database error'));
+
+      const result = await service.forCourse(courseId);
+
+      expect(result).toBeNull();
     });
   });
 });

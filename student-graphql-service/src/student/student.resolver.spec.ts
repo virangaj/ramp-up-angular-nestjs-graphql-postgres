@@ -351,39 +351,4 @@ describe('StudentResolver', () => {
       expect(result).toEqual(studentData);
     });
   });
-  // describe('ResolveReference', () => {
-  //   it('Should resolve a student by ID', async () => {
-  //     const reference = {
-  //       __typename: 'Student',
-  //       id: 1,
-  //     };
-  //     const student: Student = {
-  //       id: 1,
-  //       name: 'saman',
-  //       email: 'saman@gmail.com',
-  //       gender: 'male',
-  //       address: 'No. 53, Galle Road, Dehiwala',
-  //       mobileNo: '0715586362',
-  //       dob: new Date('1996-02-25'),
-  //       age: 25,
-  //       createdAt: new Date(),
-  //       courseId: 1,
-  //       course: undefined,
-  //     };
-  //     jest.spyOn(studentService, 'findOne').mockResolvedValue(student);
-  //     const result = await resolver.resolveReference(reference);
-  //     expect(studentService.findOne).toHaveBeenCalledWith(reference.id);
-  //     expect(result).toEqual(student);
-  //   });
-
-  //   it('Should throw an error if student is not found', async () => {
-  //     const reference = {
-  //       __typename: 'Student',
-  //       id: 999, // Assuming ID doesn't exist
-  //     };
-  //     jest.spyOn(studentService, 'findOne').mockResolvedValue(null);
-  //     const result = await resolver.resolveReference(reference);
-  //     expect(result).toBeNull();
-  //   });
-  // });
 });

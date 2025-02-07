@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateBulkStudentInput } from './dto/create-bulk-students.input';
@@ -20,20 +20,28 @@ export class StudentService {
   create(createStudentInput: CreateStudentInput): Promise<Student> {
     try {
       this.logger.log('Creating new student started.');
+      //  calculate age -> assume dob is not this year
+
+      let age =
+        new Date().getFullYear() -
+        new Date(createStudentInput.dob).getFullYear();
+      if (age < 0) {
+        throw new BadRequestException('Invalid birthday.');
+      }
       const student: Student =
         this.studentRepository.create(createStudentInput);
-      //  calculate age -> assume dob is not this year
-      let age = new Date().getFullYear() - new Date(student.dob).getFullYear();
+
       student.age = age;
-      if (age < 0) {
-        throw new Error('Invalid birthday.');
-      }
+
       student.createdAt = new Date();
       const createdStudent = this.studentRepository.save(student);
       this.logger.log('Student created successfully.');
       return createdStudent;
     } catch (error) {
       this.logger.error('Failed to create student: ' + error.message);
+      if (error instanceof BadRequestException) {
+        throw error.message;
+      }
       throw new Error('Unable to create student. Please try again later.');
     }
   }
@@ -47,13 +55,14 @@ export class StudentService {
       const students: Student[] = await Promise.all(
         createStudentInput.bulkCreateStudents.map(
           async (student: CreateStudentInput) => {
-            const singleStd = this.studentRepository.create(student);
             let age =
-              new Date().getFullYear() - new Date(singleStd.dob).getFullYear();
+              new Date().getFullYear() - new Date(student.dob).getFullYear();
             if (age < 0) {
               await queryRunner.rollbackTransaction();
-              throw new Error('Invalid birthday.');
+              throw new BadRequestException('Invalid birthday.');
             }
+            const singleStd = this.studentRepository.create(student);
+
             singleStd.age = age;
             singleStd.createdAt = new Date();
             return singleStd;
@@ -67,6 +76,9 @@ export class StudentService {
     } catch (error) {
       this.logger.error('Failed to create students: ' + error.message);
       await queryRunner.rollbackTransaction();
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new Error('Unable to create students. Please try again later.');
     }
   }
@@ -89,18 +101,19 @@ export class StudentService {
       // Fetch the existing student
       const student = await this.studentRepository.findOne({ where: { id } });
       if (!student) {
-        throw new Error('Student not found');
+        throw new BadRequestException('Student not found');
+      }
+      const age =
+        new Date().getFullYear() -
+        new Date(updateStudentInput.dob).getFullYear();
+      if (age < 0) {
+        throw new BadRequestException('Invalid birthday.');
       }
       const updateStudent: Student = {
         ...student,
         ...updateStudentInput,
       };
-      const age =
-        new Date().getFullYear() -
-        new Date(updateStudentInput.dob).getFullYear();
-      if (age < 0) {
-        throw new Error('Invalid birthday.');
-      }
+
       updateStudent.age = age;
       updateStudent.updatedAt = new Date();
       const updatedStudent = await this.studentRepository.save(updateStudent);
@@ -109,6 +122,9 @@ export class StudentService {
       return updatedStudent;
     } catch (error) {
       this.logger.error('Failed to update student : ' + error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new Error('Unable to update students. Please try again later.');
     }
   }

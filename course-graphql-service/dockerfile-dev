@@ -1,4 +1,4 @@
-FROM node:20.9.0 AS gateway-base
+FROM node:20.9.0 AS course-base
 
 WORKDIR /usr/src/app
 

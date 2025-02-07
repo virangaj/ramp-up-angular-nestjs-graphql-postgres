@@ -15,6 +15,6 @@ RUN npm install -g npm@10.1.0
 COPY package.json ./
 
 
-RUN npm install --only=production
+RUN npm install --force --only=production
 RUN rm -f package.json
 

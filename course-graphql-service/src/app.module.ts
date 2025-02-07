@@ -12,10 +12,11 @@ import { Client } from 'pg';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloFederationDriver,
       autoSchemaFile: join(process.cwd(), 'src/graphql-schema.gql'),
+      playground: true,
+      introspection: true,
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
-        // Ensure the database exists before proceeding
         const client = new Client({
           host: process.env.DATABASE_HOST,
           port: parseInt(process.env.DATABASE_PORT, 10),
@@ -52,7 +53,7 @@ import { Client } from 'pg';
           password: process.env.DATABASE_PASSWORD,
           database: dbName,
           entities: ['dist/**/*.entity{.ts,.js}'],
-          synchronize: true, // Sync schema automatically (for development)
+          synchronize: true,
         };
       },
     }),

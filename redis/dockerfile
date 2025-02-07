@@ -1,0 +1,4 @@
+FROM redis:6.2-alpine
+ENV REDIS_PASSWORD eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+
+CMD ["redis-server", "--save", "20", "1", "--loglevel", "warning", "--requirepass", "$REDIS_PASSWORD"]

@@ -1,14 +1,10 @@
 FROM postgres:latest
 
-# Set environment variables
 ENV POSTGRES_USER=postgres \
     POSTGRES_PASSWORD=123456
 
-# Expose PostgreSQL port
 EXPOSE 5432
 
-# Use a volume for persistent storage
 VOLUME ["/var/lib/postgresql/data"]
 
-# Default command
 CMD ["postgres"]

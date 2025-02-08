@@ -2,10 +2,15 @@ FROM node:20.9.0 AS dashboard-base
 
 WORKDIR /usr/src/app
 
-RUN npm i -g npm@10.1.0 && npm -v
+RUN npm -v
+RUN npm i -g npm@10.1.0
 
-COPY package.json package-lock.json ./
+RUN npm -v
 
-RUN npm ci
+COPY package.json ./
+
+RUN npm i
 
 RUN npm i -g rimraf
+
+RUN rm -f package.json

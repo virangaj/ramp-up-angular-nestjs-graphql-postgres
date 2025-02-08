@@ -1,4 +1,4 @@
-FROM dashboard-base:latest AS build
+FROM course-base:latest AS build
 
 WORKDIR /usr/src/app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm run build
 
-FROM dashboard-prod AS prod
+FROM course-prod AS prod
 
 WORKDIR /usr/src/app
 
@@ -16,4 +16,6 @@ RUN chown node:node -R /usr/src/app
 
 USER node
 
-CMD ["http-server", "dist/ui"]
+EXPOSE 3003
+
+CMD [ "node", "dist/main" ]

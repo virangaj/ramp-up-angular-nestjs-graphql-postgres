@@ -1,12 +1,10 @@
-FROM dashboard-base AS build
+FROM dashboard-base:latest AS build
 
 WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm install -g @angular/cli
-
-RUN ng build --configuration=production
+RUN npm run build
 
 FROM dashboard-prod AS prod
 
@@ -14,5 +12,8 @@ WORKDIR /usr/src/app
 
 COPY --from=build /usr/src/app/dist ./dist
 
+RUN chown node:node -R /usr/src/app
 
-CMD ["ng", "serve", "--host", "0.0.0.0"]
+USER node
+
+CMD ["http-server", "dist/ui"]

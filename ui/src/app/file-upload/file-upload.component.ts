@@ -1,6 +1,7 @@
 import { HttpClient, HttpEventType } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { finalize, Subscription } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-file-upload',
@@ -24,7 +25,7 @@ export class FileUploadComponent {
       formData.append('file', file);
 
       const upload = this.http
-        .post('http://localhost:3002/fileupload/data', formData, {
+        .post(environment.FILE_UPLOAD_API, formData, {
           reportProgress: true,
           observe: 'events',
         })

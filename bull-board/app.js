@@ -4,14 +4,14 @@ const { createBullBoard } = require("@bull-board/api");
 const { BullAdapter } = require("@bull-board/api/bullAdapter");
 const { ExpressAdapter } = require("@bull-board/express");
 const Queue = require("bull");
-
+require('dotenv').config()
 const app = express();
 const port = 5000;
 
 // Connect to the existing queue
 const fileUploadQueue = new Queue("FILEUPLOAD_QUEUE", {
   redis: {
-    host: "localhost",
+    host: process.env.REDIS_HOST,
     port: 6379,
   },
 });

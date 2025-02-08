@@ -19,7 +19,6 @@ import { Course } from './student/entities/course.entity';
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
-        // Ensure the database exists before proceeding
         const client = new Client({
           host: process.env.DATABASE_HOST,
           port: parseInt(process.env.DATABASE_PORT, 10),
@@ -56,7 +55,7 @@ import { Course } from './student/entities/course.entity';
           password: process.env.DATABASE_PASSWORD,
           database: dbName,
           entities: ['dist/**/*.entity{.ts,.js}'],
-          synchronize: true, // Sync schema automatically (for development)
+          synchronize: true,
         };
       },
     }),

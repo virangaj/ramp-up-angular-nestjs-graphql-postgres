@@ -2,11 +2,15 @@ FROM node:20.9.0-alpine AS dashboard-prod
 
 WORKDIR /usr/src/app
 
-RUN npm install -g npm@10.1.0 && npm -v
 
-COPY package.json package-lock.json ./
+RUN npm -v
+RUN npm install -g npm@10.1.0
+
+
+COPY package.json ./
+
+RUN npm install -g @angular/cli
 
 RUN npm install --only=production
-
+RUN npm install http-server -g
 RUN rm -f package.json
-RUN rm -f package-lock.json

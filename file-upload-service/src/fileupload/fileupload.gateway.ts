@@ -47,4 +47,9 @@ export class FileUploadGateway
     this.logger.log(`Send Final Message ${message}`);
     this.server.emit('process-status', { status: status, message: message });
   }
+
+  sendNotificationWithData(topic: string, status: number, message: any): void {
+    this.logger.log(`Send Final Message ${message}`);
+    this.server.emit(topic, { status: status, data: message });
+  }
 }

@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
   FileTypeValidator,
   Get,
+  HttpCode,
   Logger,
+  Param,
   ParseFilePipe,
   Post,
   UploadedFile,
@@ -47,6 +50,5 @@ export class FileuploadController {
   ) {
     this.logger.log('File uploaded and save to local : ' + file.filename);
     return this.fileuploadService.processBulkUplod(file.filename);
-
   }
 }

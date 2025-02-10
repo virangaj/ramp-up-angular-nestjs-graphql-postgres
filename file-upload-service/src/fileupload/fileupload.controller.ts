@@ -1,21 +1,14 @@
 import {
   Body,
   Controller,
-  FileTypeValidator,
-  Get,
-  HttpCode,
   Logger,
-  Param,
-  ParseFilePipe,
   Post,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
-import { FileuploadService } from './fileupload.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { NumberAddInterceptor } from 'src/interceptor/number-add';
 import { FileUploadInterceptor } from 'src/interceptor/fileupload-interceptor';
+import { NumberAddInterceptor } from 'src/interceptor/number-add';
+import { FileuploadService } from './fileupload.service';
 @Controller('/fileupload')
 export class FileuploadController {
   constructor(private readonly fileuploadService: FileuploadService) {}
@@ -31,12 +24,10 @@ export class FileuploadController {
     this.logger.log('File uploaded and save to local : ' + file.filename);
     return this.fileuploadService.processBulkUplod(file.filename);
   }
-  @Post('/test-upload')
-  @UseInterceptors(FileUploadInterceptor)
-  async testFileUpload(
-    @UploadedFile()
-    file: Express.Multer.File,
-  ) {
-    return this.fileuploadService.testFileUpload(file.filename);
+
+  @Post('/test')
+  @UseInterceptors(NumberAddInterceptor)
+  async testPost(@Body() data: { id: number }) {
+    return this.fileuploadService.testService(data.id);
   }
 }

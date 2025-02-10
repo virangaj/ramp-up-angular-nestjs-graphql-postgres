@@ -49,9 +49,8 @@ export class FileuploadService {
     }
   }
 
-
-  async testFileUpload(filename: string) {
-    this.logger.log('Test Service Called with FILENMAfilename :' + filename);
-    return { message: 'Test Service Called with FILENMAfilename :' + filename };
+  async testService(id: number) {
+    this.logger.log('Test Service Called with ID :' + id);
+    return { message: 'Test Service Called with ID :' + id };
   }
 }

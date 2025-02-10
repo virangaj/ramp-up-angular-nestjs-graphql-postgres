@@ -14,6 +14,8 @@ import {
 import { FileuploadService } from './fileupload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { NumberAddInterceptor } from 'src/interceptor/number-add';
+import { FileUploadInterceptor } from 'src/interceptor/fileupload-interceptor';
 @Controller('/fileupload')
 export class FileuploadController {
   constructor(private readonly fileuploadService: FileuploadService) {}
@@ -21,34 +23,20 @@ export class FileuploadController {
     timestamp: true,
   });
   @Post('/data')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        //  save file to load storage
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const filename = `${Date.now()}_${file.originalname}`;
-          callback(null, filename);
-        },
-      }),
-      fileFilter: (req, file, callback) => {
-        const validTypes = [
-          'application/vnd.ms-excel',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ];
-        if (validTypes.includes(file.mimetype)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Invalid file type'), false);
-        }
-      },
-    }),
-  )
+  @UseInterceptors(FileUploadInterceptor)
   uploadFile(
     @UploadedFile()
     file: Express.Multer.File,
   ) {
     this.logger.log('File uploaded and save to local : ' + file.filename);
     return this.fileuploadService.processBulkUplod(file.filename);
+  }
+  @Post('/test-upload')
+  @UseInterceptors(FileUploadInterceptor)
+  async testFileUpload(
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return this.fileuploadService.testFileUpload(file.filename);
   }
 }

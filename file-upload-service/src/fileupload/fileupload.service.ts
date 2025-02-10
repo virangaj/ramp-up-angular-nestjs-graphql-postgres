@@ -48,4 +48,10 @@ export class FileuploadService {
       });
     }
   }
+
+
+  async testFileUpload(filename: string) {
+    this.logger.log('Test Service Called with FILENMAfilename :' + filename);
+    return { message: 'Test Service Called with FILENMAfilename :' + filename };
+  }
 }

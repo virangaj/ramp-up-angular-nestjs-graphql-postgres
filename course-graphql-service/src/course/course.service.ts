@@ -14,17 +14,19 @@ export class CourseService {
     timestamp: true,
   });
   create(createCourseInput: CreateCourseInput): Promise<Course> {
-    try {
-      const course: Course = this.courseRepository.create(createCourseInput);
-      const createdCourse = this.courseRepository.save(course);
-      return createdCourse;
-    } catch (error) {
-      this.logger.error('Failed to create course: ' + error.message);
-      if (error instanceof BadRequestException) {
-        throw error.message;
-      }
-      throw new Error('Unable to create course. Please try again later.');
+    const courseDB = this.courseRepository.findOne({
+      where: { name: createCourseInput.name },
+    });
+    if (courseDB) {
+      this.logger.error('Course already exists: ' + createCourseInput.name);
+      throw new BadRequestException({
+        status: 404,
+        message: 'Course Already Exists',
+      });
     }
+    const course: Course = this.courseRepository.create(createCourseInput);
+    const createdCourse = this.courseRepository.save(course);
+    return createdCourse;
   }
   findAll(): Promise<Course[]> {
     return this.courseRepository.find();
@@ -37,6 +39,10 @@ export class CourseService {
   async update(id: number, updateCourseInput: UpdateCourseInput) {
     try {
       const course = await this.courseRepository.findOne({ where: { id } });
+      if (!course) {
+        this.logger.error('Course not found: ' + id);
+        throw new BadRequestException('Course not found');
+      }
       const updateCourse: Course = {
         ...course,
         ...updateCourseInput,
@@ -45,9 +51,6 @@ export class CourseService {
       return updatedCouse;
     } catch (error) {
       this.logger.error('Failed to update course : ' + error.message);
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
       throw new Error('Unable to update courses. Please try again later.');
     }
   }
@@ -58,7 +61,7 @@ export class CourseService {
       .then(async (course) => {
         if (!course) {
           this.logger.error('Failed to delete course : course not found.');
-          throw new Error('course not found');
+          throw new BadRequestException('course not found');
         }
         const deletedCourse = await this.courseRepository.delete(id);
         if (deletedCourse.affected === 1) {

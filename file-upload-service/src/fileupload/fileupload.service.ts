@@ -44,7 +44,7 @@ export class FileuploadService {
     } catch (err) {
       this.logger.error('Failed to parse file : ' + err.message);
       throw new InternalServerErrorException({
-        message: 'Bad Request Exception',
+        message: 'FIle upload failed',
       });
     }
   }

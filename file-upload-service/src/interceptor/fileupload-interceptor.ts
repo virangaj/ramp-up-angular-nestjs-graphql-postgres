@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
+  BadRequestException,
 } from '@nestjs/common';
 import * as multer from 'multer';
 import { diskStorage } from 'multer';
@@ -23,13 +24,23 @@ export class FileUploadInterceptor implements NestInterceptor {
         callback(null, filename);
       },
     }),
+    fileFilter: (req, file, callback) => {
+      const validTypes = [
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ];
+      if (validTypes.includes(file.mimetype)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
   }).single('file');
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    // this.logger.log('Before...');
     const request = context.switchToHttp().getRequest();
 
     await new Promise<void>((resolve, reject) => {
@@ -39,6 +50,9 @@ export class FileUploadInterceptor implements NestInterceptor {
       });
     });
 
+    if (!request.file?.filename) {
+      throw new BadRequestException('Invalid File Type');
+    }
     const filename = request.file?.filename;
 
     return next

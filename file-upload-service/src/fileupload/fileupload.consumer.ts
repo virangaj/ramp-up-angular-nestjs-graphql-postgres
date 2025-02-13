@@ -94,7 +94,7 @@ export class FileUploadConsumer {
         this.logger.log('File deleted successfully :' + filePath);
         this.fileUploadGateway.sendNotificationWithData(PROCESS_STATUS, 200, {
           referenceNo: job.data.referenceNo as string,
-          message: 'File Processing started, This may take time!',
+          message: 'File Processing Completed!',
         });
       }
       return response.data.bulkCreateStudents;

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   Logger,
   Post,
   UploadedFile,
@@ -17,6 +18,7 @@ export class FileuploadController {
   });
   @Post('/data')
   @UseInterceptors(FileUploadInterceptor)
+  @HttpCode(202)
   uploadFile(
     @UploadedFile()
     file: Express.Multer.File,

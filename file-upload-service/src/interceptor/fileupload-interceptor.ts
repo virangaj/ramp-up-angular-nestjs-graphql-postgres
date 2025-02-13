@@ -16,6 +16,7 @@ export class FileUploadInterceptor implements NestInterceptor {
   private readonly logger = new Logger(FileUploadInterceptor.name, {
     timestamp: true,
   });
+  //  assume file uploads to S3 bucket, here mimicing behavior
   private upload = multer({
     storage: diskStorage({
       destination: 'uploads/',

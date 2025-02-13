@@ -1,0 +1,27 @@
+# Use a base image with Java installed (required for Kafka)
+FROM openjdk:11
+
+# Set environment variables
+ENV KAFKA_VERSION=2.13-3.6.0
+ENV KAFKA_HOME=/opt/kafka
+ENV SCALA_VERSION=2.13
+
+# Install dependencies and download Kafka
+RUN apt-get update && apt-get install -y wget && \
+    wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
+    tar -xvzf kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
+    mv kafka_${SCALA_VERSION}-${KAFKA_VERSION} ${KAFKA_HOME} && \
+    rm kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz
+
+# Set working directory
+WORKDIR ${KAFKA_HOME}
+
+# Expose necessary ports
+EXPOSE 9092 2181
+
+# Copy entrypoint script
+COPY start-kafka.sh /usr/bin/start-kafka.sh
+RUN chmod +x /usr/bin/start-kafka.sh
+
+# Run the startup script
+CMD ["/usr/bin/start-kafka.sh"]

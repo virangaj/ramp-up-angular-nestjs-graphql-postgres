@@ -26,6 +26,7 @@ export class StudentService {
         new Date().getFullYear() -
         new Date(createStudentInput.dob).getFullYear();
       if (age < 0) {
+        this.logger.error('Invalid birth date: ' + createStudentInput.dob);
         throw new BadRequestException('Invalid birthday.');
       }
       const student: Student =
@@ -178,13 +179,15 @@ export class StudentService {
 
   async forCourse(id: number): Promise<Student[]> {
     try {
-      this.logger.log('Fetching students for course :'+ id);
+      this.logger.log('Fetching students for course :' + id);
       const students = await this.studentRepository.find({
         where: { courseId: id },
       });
       return students;
     } catch (error) {
-      this.logger.error('Failed to fetch students for course :'+ error.message);
+      this.logger.error(
+        'Failed to fetch students for course :' + error.message,
+      );
       return null;
     }
   }

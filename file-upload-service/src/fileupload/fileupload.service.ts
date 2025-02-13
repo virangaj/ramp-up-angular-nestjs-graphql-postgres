@@ -1,8 +1,14 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Queue } from 'bull';
 import * as path from 'path';
-import { FILEUPLOAD_QUEUE } from 'src/constants/constant';
+import { FILEUPLOAD_QUEUE, PROCESS_STARTED } from 'src/constants/constant';
+import { FileUploadGateway } from './fileupload.gateway';
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class FileuploadService {
   private readonly logger = new Logger(FileuploadService.name, {
@@ -11,6 +17,7 @@ export class FileuploadService {
 
   constructor(
     @InjectQueue(FILEUPLOAD_QUEUE) private readonly fileUploadQueue: Queue,
+    private fileUploadGateway: FileUploadGateway,
   ) {}
 
   async processBulkUplod(filename: string) {
@@ -23,12 +30,27 @@ export class FileuploadService {
 
     try {
       this.logger.log('Adding job to queue...');
-      this.fileUploadQueue.add(FILEUPLOAD_QUEUE, { filePath });
+      const referenceNo = uuidv4();
+      this.fileUploadQueue.add(FILEUPLOAD_QUEUE, { referenceNo, filePath });
       this.logger.log('Job added successfully!');
-      return { message: 'File upload function triggered successfully' };
+      this.fileUploadGateway.sendNotificationWithData(PROCESS_STARTED, 200, {
+        referenceNo: referenceNo,
+        message: 'File Processing started, This may take time!',
+      });
+      return {
+        referenceNo: referenceNo,
+        message: 'File Processing started, This may take time!',
+      };
     } catch (err) {
       this.logger.error('Failed to parse file : ' + err.message);
-      return null;
+      throw new InternalServerErrorException({
+        message: 'FIle upload failed',
+      });
     }
+  }
+
+  async testService(id: number) {
+    this.logger.log('Test Service Called with ID :' + id);
+    return { message: 'Test Service Called with ID :' + id };
   }
 }
